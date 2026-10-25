@@ -1,0 +1,12 @@
+# OpticHound - Optional Dependencies
+# -------------------------------------------------------------
+# OpticHound is built to run 100% out-of-the-box with Python's
+# standard library alone. NO external packages are required!
+#
+# Installing these optional packages enables enhanced capabilities:
+# - zeroconf: Deep multicast DNS / Apple Bonjour service discovery
+# - colorama: Color rendering on legacy Windows cmd.exe
+# - scapy:    Kernel-level raw ARP packet transmission (optional)
+
+zeroconf>=0.130.0
+colorama>=0.4.6

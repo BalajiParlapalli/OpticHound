@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Live network scan reports (prevents pushing personal Wi-Fi scan results to GitHub)
+optichound_report_*.html
+audit_results*.json
+live_results*.json
+*_audit.html
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Editor & OS artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini

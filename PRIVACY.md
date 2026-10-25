@@ -1,0 +1,87 @@
+# Privacy Policy for OpticHound
+
+**Effective Date:** October 25, 2026  
+**Last Updated:** October 25, 2026  
+**Tool Name:** OpticHound (Surveillance Audit & Network Security Tool)
+
+---
+
+## 1. Introduction & Core Privacy Philosophy
+
+OpticHound is designed with a **privacy-by-architecture** and **local-first** approach. We believe privacy tools must not compromise the user's privacy in order to protect it.
+
+- **Zero Cloud Data Transfer**: OpticHound operates **100% locally on your machine**. It does not transmit scan results, IP addresses, MAC addresses, network names, or device fingerprints to any external server or third party.
+- **Zero Telemetry & Analytics**: OpticHound contains **no analytics SDKs, no tracking pixels, no session-replay tools, and no telemetry pings**.
+- **Zero Account Creation**: You do not need to register, provide an email address, or create an account to use OpticHound.
+- **Zero Cookies**: The generated HTML reports and tools use **zero tracking cookies, advertising cookies, or third-party storage**.
+
+---
+
+## 2. Information Processed Locally on Your Device
+
+To detect potential hidden cameras and rogue surveillance equipment on your local network, OpticHound temporarily processes standard Layer-2 and Layer-3 networking metadata:
+
+| Data Type | Purpose | Storage & Retention |
+| :--- | :--- | :--- |
+| **Local IP Addresses** | Probing local subnet devices for open surveillance ports | In-memory during execution; saved only to local report if requested |
+| **MAC Addresses & OUIs** | Matching manufacturer prefixes against known camera databases | In-memory during execution; saved only to local report if requested |
+| **Service Banners (RTSP/HTTP)** | Verifying camera protocol handshakes and web titles | In-memory during execution; saved only to local report if requested |
+| **Ambient Wi-Fi SSIDs** | Identifying rogue P2P spy-camera hotspots broadcasting nearby | In-memory during execution; saved only to local report if requested |
+| **Camera Snapshots** | Verifying optical proof from unauthenticated HTTP camera endpoints | Converted to Base64 and saved exclusively inside your local HTML file |
+
+**None of this data ever leaves your computer.** You maintain 100% ownership and control over all output files (`.html`, `.json`) stored on your machine.
+
+---
+
+## 3. Compliance with Indian Data Protection Requirements (DPDP Act, 2023)
+
+OpticHound is designed to comply with India's **Digital Personal Data Protection Act, 2023 (DPDP Act)** and the **Information Technology Act, 2000**:
+
+- **No Processing by External Data Fiduciary**: Under the DPDP Act, an entity that determines the purpose and means of data processing is a Data Fiduciary. Because OpticHound is an entirely offline, locally installed utility, the developer does not receive, host, or process your personal data. You act as the sole controller of the tool on your own device.
+- **Data Minimization (Section 6)**: The tool only inspects the minimal network headers necessary to identify surveillance ports and hardware signatures.
+- **Purpose Limitation**: Network probing is strictly confined to security auditing on the local subnet specified by the user.
+- **Right to Erasure & Access (Section 12)**: Since all scan outputs (HTML, JSON) are stored in your local file system, you can view, backup, or permanently delete your scan records at any time simply by deleting the files from your folder.
+- **No Cross-Border Data Flow**: Because there are no outbound cloud transmissions, zero data is transferred across international borders.
+
+---
+
+## 4. Compliance with GDPR, CCPA / CPRA & International Standards
+
+- **GDPR (Regulation EU 2016/679)**: 
+  - OpticHound complies with Article 25 (*Data protection by design and by default*).
+  - No personal data is stored on remote servers; IP and MAC addresses processed in memory are ephemeral and discarded upon process termination.
+- **California Consumer Privacy Act (CCPA / CPRA)**:
+  - We do not sell, share, or monetize your personal information.
+  - We do not collect identifiers for behavioral advertising.
+
+---
+
+## 5. Cookies, Web Beacons & Third-Party Integrations
+
+- **Cookies**: OpticHound does not set or read HTTP cookies.
+- **Third-Party Fonts & CDNs**: The HTML report uses system-native UI font stacks (`-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `Roboto`). No requests are made to Google Fonts, Adobe Typekit, or external content delivery networks.
+- **Third-Party Embeds**: There are zero social media widgets, embedded iframes, or external script trackers.
+- **Session Replay Tools**: Tools like Hotjar, FullStory, LogRocket, or Microsoft Clarity are **strictly excluded**.
+
+---
+
+## 6. Children's Privacy (COPPA & DPDP Act Age Protection)
+
+OpticHound is a technical utility intended for adults, property travelers, and network administrators aged 18 and older. We do not knowingly collect or solicit any data from children.
+
+---
+
+## 7. Security of Your Local Scan Reports
+
+HTML reports generated by OpticHound contain information about the network you audited (such as IP addresses and device hostnames). 
+- If an unauthenticated camera snapshot is captured, it is embedded as an inline Base64 data string directly within the HTML file.
+- We recommend keeping your generated reports stored in a private directory and not posting raw reports publicly on the internet if they contain sensitive local network configurations.
+
+---
+
+## 8. Contact & Vulnerability Reporting
+
+If you have questions regarding this Privacy Policy, privacy practices, or wish to report a security issue, please contact:
+
+- **Project Security & Privacy Contact**: `privacy@optichound.local` (or via official GitHub repository security advisories)
+- **Developer Response SLA**: Security and privacy inquiries are reviewed within 48 business hours.

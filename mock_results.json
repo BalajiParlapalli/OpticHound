@@ -1,0 +1,294 @@
+{
+  "devices": [
+    {
+      "ip": "192.168.1.134",
+      "mac": "18:fe:34:a1:88:2d",
+      "vendor": "Espressif Inc (ESP32-CAM / IoT)",
+      "vendor_category": "IOT_CHIP",
+      "hostname": "tuya-clock-cam",
+      "device_type": "Covert Clock Spy Camera",
+      "is_gateway": false,
+      "is_local": false,
+      "open_ports": [
+        80,
+        554,
+        8080
+      ],
+      "port_banners": {
+        "80": "HTTP 200 | Server: uc-httpd/1.0.0 | Title: 'Live Video Feed' | [LIVE CAMERA SNAPSHOT CAPTURED]",
+        "554": "RTSP Server: Hipcam RTSP Server",
+        "8080": "HTTP 401 | Server: Boa/0.94.14rc21 | Realm: 'IP Camera'"
+      },
+      "services": {},
+      "http_title": "Live Video Feed",
+      "http_server": "uc-httpd/1.0.0",
+      "http_auth_realm": "IP Camera",
+      "http_urls": [
+        "http://192.168.1.134:80/"
+      ],
+      "rtsp_active": true,
+      "rtsp_server": "Hipcam RTSP Server v1.2",
+      "onvif_active": false,
+      "onvif_scopes": [],
+      "upnp_data": {
+        "friendly_name": "Smart Clock Camera",
+        "model": "IPC-Mini-HD",
+        "device_type": "urn:schemas-upnp-org:device:DigitalSecurityCamera:1"
+      },
+      "mdns_services": [],
+      "snapshot_captured": true,
+      "snapshot_url": "http://192.168.1.134:80/snapshot.jpg",
+      "snapshot_b64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0ODAiIGhlaWdodD0iMjcwIiB2aWV3Qm94PSIwIDAgNDgwIDI3MCI+CiAgPGRlZnM+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9InZpZyIgY3g9IjUwJSIgY3k9IjUwJSIgcj0iNjUlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzFlMjkzYiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMjA2MTciLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0ODAiIGhlaWdodD0iMjcwIiBmaWxsPSJ1cmwoI3ZpZykiLz4KICA8IS0tIFJvb20gRnVybmlzaGluZ3MgLS0+CiAgPHJlY3QgeD0iNTAiIHk9IjEzMCIgd2lkdGg9IjIzMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMwZjE3MmEiIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHJlY3QgeD0iNjUiIHk9IjExNSIgd2lkdGg9Ijg1IiBoZWlnaHQ9IjMwIiBmaWxsPSIjMWUyOTNiIiByeD0iNCIvPgogIDxyZWN0IHg9IjE3NSIgeT0iMTE1IiB3aWR0aD0iODUiIGhlaWdodD0iMzAiIGZpbGw9IiMxZTI5M2IiIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iMzMwIiB5PSIxMTAiIHdpZHRoPSI5MCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiMwZjE3MmEiIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPGNpcmNsZSBjeD0iMzc1IiBjeT0iODAiIHI9IjE2IiBmaWxsPSIjMzM0MTU1Ii8+CiAgPCEtLSBEaWdpdGFsIGNsb2NrIGZhY2Ugc2hvd2luZyBzcHkgbGVucyBsb2NhdGlvbiAtLT4KICA8cmVjdCB4PSIzNDUiIHk9IjEyNSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMDIwNjE3IiBzdHJva2U9IiNlZjQ0NDQiIHN0cm9rZS13aWR0aD0iMS41IiByeD0iMyIvPgogIDx0ZXh0IHg9IjM1MiIgeT0iMTQ0IiBmaWxsPSIjZWY0NDQ0IiBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCI+MTI6MzQ8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMzk1IiBjeT0iMTQwIiByPSIzLjUiIGZpbGw9IiMzOGJkZjgiIHN0cm9rZT0iI2VmNDQ0NCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgPCEtLSBTdXJ2ZWlsbGFuY2UgSFVEIE92ZXJsYXkgLS0+CiAgPGNpcmNsZSBjeD0iMjIiIGN5PSIyMiIgcj0iNiIgZmlsbD0iI2VmNDQ0NCIvPgogIDx0ZXh0IHg9IjM2IiB5PSIyNiIgZmlsbD0iI2VmNDQ0NCIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9ImJvbGQiPlJFQyAgW0xJVkUgRkVFRCBDQVBUVVJFRF08L3RleHQ+CiAgPHRleHQgeD0iMjAiIHk9IjI1NSIgZmlsbD0iIzM4YmRmOCIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSIxMSI+Q0FNXzAxOiBCRURST09NX0NMT0NLX1NQWUNBTSB8IDE5Mi4xNjguMS4xMzQ6ODAvc25hcHNob3QuanBnPC90ZXh0PgogIDx0ZXh0IHg9IjM3MCIgeT0iMjYiIGZpbGw9IiM5NGEzYjgiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiPjEwODBQIDMwRlBTPC90ZXh0PgogIDwhLS0gUmV0aWNsZSAtLT4KICA8Y2lyY2xlIGN4PSIyNDAiIGN5PSIxMzUiIHI9IjQ1IiBmaWxsPSJub25lIiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA0IiBvcGFjaXR5PSIwLjUiLz4KICA8bGluZSB4MT0iMjIwIiB5MT0iMTM1IiB4Mj0iMjYwIiB5Mj0iMTM1IiBzdHJva2U9IiMzOGJkZjgiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC41Ii8+CiAgPGxpbmUgeDE9IjI0MCIgeTE9IjExNSIgeDI9IjI0MCIgeTI9IjE1NSIgc3Ryb2tlPSIjMzhiZGY4IiBzdHJva2Utd2lkdGg9IjEiIG9wYWNpdHk9IjAuNSIvPgo8L3N2Zz4=",
+      "score": 100,
+      "risk_level": "CRITICAL",
+      "evidence": [
+        "Evidence(points=50, category='SNAPSHOT', description='CAPTURED LIVE CAMERA SNAPSHOT from unauthenticated endpoint: http://192.168.1.134:80/snapshot.jpg', details='Unauthenticated live optical feed confirmed! Live frame captured from bedside clock.')",
+        "Evidence(points=45, category='STREAM', description='Active RTSP Video Streaming Protocol on port 554 (Hipcam RTSP Server v1.2)', details='Live RTSP stream is accessible.')",
+        "Evidence(points=25, category='VENDOR', description='MAC OUI matched IoT/Spy Cam Chipset: Espressif Inc (ESP32-CAM)', details='Heavily used in mini hidden spy cameras.')",
+        "Evidence(points=35, category='WEB', description=\"Web Dashboard Title matches camera: 'Live Video Feed'\", details='Interface indicates direct camera view.')",
+        "Evidence(points=25, category='WEB', description=\"Embedded Camera Web Server header detected: 'uc-httpd/1.0.0'\", details='Common embedded camera web server.')",
+        "Evidence(points=30, category='WEB', description=\"Authentication Realm specifies camera: 'IP Camera'\", details='HTTP 401 challenge realm.')",
+        "Evidence(points=35, category='UPNP', description=\"UPnP Device Descriptor identifies as camera: 'Smart Clock Camera'\", details='XML declares DigitalSecurityCamera.')"
+      ],
+      "recommendation": "CONFIRMED SURVEILLANCE DEVICE. Immediate physical inspection recommended. Locate lens and report to booking platform if undeclared."
+    },
+    {
+      "ip": "192.168.1.185",
+      "mac": "44:19:b6:54:11:90",
+      "vendor": "Hangzhou Hikvision Digital Technology",
+      "vendor_category": "CAM_BRAND",
+      "hostname": "hik-ipcam-ds2cd",
+      "device_type": "IP Security Camera",
+      "is_gateway": false,
+      "is_local": false,
+      "open_ports": [
+        80,
+        554,
+        8000,
+        8899
+      ],
+      "port_banners": {
+        "80": "HTTP 200 | Server: Hikvision-Web | Title: 'Hikvision Live View'",
+        "554": "RTSP Server: Hikvision RTSP Server",
+        "8000": "Hikvision Device Control Protocol Port",
+        "8899": "ONVIF Web Service Listener"
+      },
+      "services": {},
+      "http_title": "Hikvision Live View",
+      "http_server": "Hikvision-Web",
+      "http_auth_realm": "Hikvision",
+      "http_urls": [
+        "http://192.168.1.185:80/"
+      ],
+      "rtsp_active": true,
+      "rtsp_server": "Hikvision RTSP Server",
+      "onvif_active": true,
+      "onvif_scopes": [],
+      "upnp_data": {},
+      "mdns_services": [],
+      "snapshot_captured": false,
+      "snapshot_url": "",
+      "snapshot_b64": "",
+      "score": 95,
+      "risk_level": "CRITICAL",
+      "evidence": [
+        "Evidence(points=45, category='STREAM', description='Active RTSP Video Streaming Protocol on port 554 (Hikvision RTSP Server)', details='Live streaming feed open.')",
+        "Evidence(points=45, category='PROTOCOL', description='Responded to ONVIF WS-Discovery Probe (NetworkVideoTransmitter)', details='Industry standard IP camera protocol.')",
+        "Evidence(points=35, category='VENDOR', description='MAC OUI matched security camera brand: Hangzhou Hikvision Digital Technology', details='Surveillance hardware manufacturer.')",
+        "Evidence(points=35, category='WEB', description=\"Web Dashboard Title matches camera: 'Hikvision Live View'\", details='Surveillance web dashboard.')",
+        "Evidence(points=30, category='PROTOCOL', description='Port 8000 Open (Hikvision Video SDK & Control Service)', details='Hikvision control port.')"
+      ],
+      "recommendation": "CONFIRMED SURVEILLANCE DEVICE. Check if host declared exterior/hallway cameras in listing."
+    },
+    {
+      "ip": "192.168.1.42",
+      "mac": "68:54:5a:33:41:9f",
+      "vendor": "Ring LLC / Amazon Echo",
+      "vendor_category": "SMART_DISPLAY",
+      "hostname": "echo-show-kitchen",
+      "device_type": "Smart Display (Camera/Mic)",
+      "is_gateway": false,
+      "is_local": false,
+      "open_ports": [
+        8008,
+        8009,
+        8443
+      ],
+      "port_banners": {
+        "8443": "HTTPS 200 | Server: Amazon-Echo"
+      },
+      "services": {},
+      "http_title": "Amazon Device",
+      "http_server": "Amazon-Echo",
+      "http_auth_realm": "",
+      "http_urls": [],
+      "rtsp_active": false,
+      "rtsp_server": "",
+      "onvif_active": false,
+      "onvif_scopes": [],
+      "upnp_data": {},
+      "mdns_services": [],
+      "snapshot_captured": false,
+      "snapshot_url": "",
+      "snapshot_b64": "",
+      "score": 35,
+      "risk_level": "MEDIUM",
+      "evidence": [
+        "Evidence(points=15, category='VENDOR', description='Smart Home Device with potential camera/mic: Ring LLC / Amazon Echo', details='Equipped with camera/microphone.')",
+        "Evidence(points=10, category='PORT', description='Port 8443 Open (HTTPS Alternate)', details='Local management endpoint.')"
+      ],
+      "recommendation": "POTENTIAL SURVEILLANCE / SMART IOT. Device has optical camera and microphones. You may choose to cover the camera shutter."
+    },
+    {
+      "ip": "192.168.1.1",
+      "mac": "f4:4d:5c:f7:67:4e",
+      "vendor": "TP-Link Technologies",
+      "vendor_category": "SMART_DISPLAY",
+      "hostname": "tplinkwifi.net",
+      "device_type": "Wi-Fi Router / Gateway",
+      "is_gateway": true,
+      "is_local": false,
+      "open_ports": [
+        80,
+        443,
+        53
+      ],
+      "port_banners": {
+        "80": "HTTP 200 | Server: TP-Link Router Web",
+        "443": "HTTPS 200 | Server: TP-Link Router Web"
+      },
+      "services": {},
+      "http_title": "TP-Link Wireless Router",
+      "http_server": "TP-Link Router Web",
+      "http_auth_realm": "",
+      "http_urls": [],
+      "rtsp_active": false,
+      "rtsp_server": "",
+      "onvif_active": false,
+      "onvif_scopes": [],
+      "upnp_data": {},
+      "mdns_services": [],
+      "snapshot_captured": false,
+      "snapshot_url": "",
+      "snapshot_b64": "",
+      "score": 15,
+      "risk_level": "LOW",
+      "evidence": [
+        "Evidence(points=10, category='WEB', description='Web Dashboard Open on standard port 80', details='Router administration page.')"
+      ],
+      "recommendation": "UNLIKELY CAMERA. Primary gateway router for local Wi-Fi internet access."
+    },
+    {
+      "ip": "192.168.1.6",
+      "mac": "3c:06:30:12:44:fa",
+      "vendor": "Apple Inc",
+      "vendor_category": "BENIGN",
+      "hostname": "MacBook-Pro.local",
+      "device_type": "This Laptop / PC",
+      "is_gateway": false,
+      "is_local": true,
+      "open_ports": [],
+      "port_banners": {},
+      "services": {},
+      "http_title": "",
+      "http_server": "",
+      "http_auth_realm": "",
+      "http_urls": [],
+      "rtsp_active": false,
+      "rtsp_server": "",
+      "onvif_active": false,
+      "onvif_scopes": [],
+      "upnp_data": {},
+      "mdns_services": [],
+      "snapshot_captured": false,
+      "snapshot_url": "",
+      "snapshot_b64": "",
+      "score": 0,
+      "risk_level": "SAFE",
+      "evidence": [],
+      "recommendation": "BENIGN DEVICE. This is your personal laptop running the scanner."
+    },
+    {
+      "ip": "192.168.1.15",
+      "mac": "02:bb:45:90:12:33",
+      "vendor": "Private Wi-Fi MAC (Smartphone/Tablet)",
+      "vendor_category": "RANDOMIZED",
+      "hostname": "iPhone",
+      "device_type": "Smartphone / Tablet",
+      "is_gateway": false,
+      "is_local": false,
+      "open_ports": [],
+      "port_banners": {},
+      "services": {},
+      "http_title": "",
+      "http_server": "",
+      "http_auth_realm": "",
+      "http_urls": [],
+      "rtsp_active": false,
+      "rtsp_server": "",
+      "onvif_active": false,
+      "onvif_scopes": [],
+      "upnp_data": {},
+      "mdns_services": [],
+      "snapshot_captured": false,
+      "snapshot_url": "",
+      "snapshot_b64": "",
+      "score": 5,
+      "risk_level": "SAFE",
+      "evidence": [
+        "Evidence(points=5, category='VENDOR', description='Private / Randomized MAC Address', details='Standard modern mobile OS privacy feature.')"
+      ],
+      "recommendation": "BENIGN DEVICE. Standard guest smartphone."
+    }
+  ],
+  "rogue_aps": [
+    {
+      "ssid": "Care-AP-88a21c",
+      "bssid": "18:fe:34:88:a2:1c",
+      "signal": "92%",
+      "security": "Open (No Password)",
+      "channel": "6",
+      "vendor": "Espressif Inc (ESP32-CAM / IoT)",
+      "vendor_category": "IOT_CHIP",
+      "risk_level": "CRITICAL",
+      "score": 95,
+      "evidence": [
+        "Evidence(points=45, category='AIR_SSID', description=\"In-Air Wi-Fi Hotspot matches spy camera pattern: 'care-ap' in 'Care-AP-88a21c'\", details='Default factory P2P hotspot for hidden clock and charger cameras.')",
+        "Evidence(points=30, category='VENDOR', description='Hotspot BSSID matches hardware: Espressif Inc (ESP32-CAM / IoT)', details='Ubiquitous covert spy camera chipset.')",
+        "Evidence(points=20, category='SECURITY', description='Unencrypted Open Wi-Fi Network', details='No password required to stream video.')",
+        "Evidence(points=15, category='PROXIMITY', description='Strong Signal Strength (92%): Device in close physical proximity!', details='Transmitter is located in the immediate room.')"
+      ],
+      "recommendation": "ROGUE IN-AIR SPY CAMERA DETECTED. Device is broadcasting its own hotspot. Search room fixtures (clocks, chargers, smoke detectors) immediately."
+    },
+    {
+      "ssid": "HD-MINI-CAM-74f0",
+      "bssid": "a0:92:08:74:f0:11",
+      "signal": "84%",
+      "security": "WPA2-Personal",
+      "channel": "1",
+      "vendor": "Tuya Smart IoT / Mini Cam",
+      "vendor_category": "IOT_CHIP",
+      "risk_level": "HIGH",
+      "score": 75,
+      "evidence": [
+        "Evidence(points=45, category='AIR_SSID', description=\"In-Air Wi-Fi Hotspot matches spy camera pattern: 'hd-mini' in 'HD-MINI-CAM-74f0'\", details='Default P2P hotspot name used by mini battery spy cameras.')",
+        "Evidence(points=30, category='VENDOR', description='Hotspot BSSID matches hardware: Tuya Smart IoT / Mini Cam', details='Smart camera transmitter.')",
+        "Evidence(points=15, category='PROXIMITY', description='Strong Signal Strength (84%): Close physical proximity', details='Located in the current suite.')"
+      ],
+      "recommendation": "SUSPICIOUS WIRELESS HOTSPOT. P2P camera hotspot detected in room vicinity."
+    },
+    {
+      "ssid": "Cabin-Guest-WiFi",
+      "bssid": "f4:4d:5c:f7:67:4e",
+      "signal": "98%",
+      "security": "WPA2-Personal",
+      "channel": "11",
+      "vendor": "TP-Link Technologies",
+      "vendor_category": "SMART_DISPLAY",
+      "risk_level": "SAFE",
+      "score": 0,
+      "evidence": [],
+      "recommendation": "Primary authorized guest Wi-Fi access point."
+    }
+  ]
+}
