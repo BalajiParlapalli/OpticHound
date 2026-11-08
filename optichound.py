@@ -772,6 +772,64 @@ def lookup_vendor(mac: str) -> Tuple[str, str, int]:
 
     return ("Unknown Manufacturer", "BENIGN", 0)
 
+def infer_mobile_brand(name: str) -> Optional[str]:
+    """
+    Infer device brand/manufacturer from hostname, mDNS advertisement, or NetBIOS name.
+    Matches Apple, Samsung, Google Pixel, OnePlus, Xiaomi/Redmi, Vivo, Oppo, etc.
+    """
+    if not name:
+        return None
+    h = name.lower()
+    if any(k in h for k in ["iphone", "ipad", "apple", "macbook", "imac"]):
+        if "iphone" in h: return "Apple iPhone"
+        if "ipad" in h: return "Apple iPad"
+        if "macbook" in h: return "Apple MacBook"
+        return "Apple Device"
+    if any(k in h for k in ["galaxy", "samsung", "sm-g", "sm-a", "sm-s", "sm-n", "gt-"]):
+        return "Samsung Galaxy"
+    if any(k in h for k in ["pixel"]):
+        return "Google Pixel"
+    if any(k in h for k in ["oneplus"]):
+        return "OnePlus"
+    if any(k in h for k in ["xiaomi", "redmi", "poco", "mi-"]):
+        return "Xiaomi / Redmi"
+    if any(k in h for k in ["vivo"]):
+        return "Vivo Phone"
+    if any(k in h for k in ["oppo", "realme"]):
+        return "Oppo / Realme"
+    if any(k in h for k in ["motorola", "moto"]):
+        return "Motorola Phone"
+    if any(k in h for k in ["huawei", "honor"]):
+        return "Huawei / Honor"
+    return None
+
+def probe_netbios_name(ip: str, timeout: float = 0.25) -> str:
+    """
+    Query NetBIOS Name Service (NBNS) on UDP port 137 to resolve computer/phone hostnames
+    when standard DNS reverse lookup fails.
+    """
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(timeout)
+        # NBNS Node Status Query for wildcard '*'
+        packet = b"\x80\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00 CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\x00\x00!\x00\x01"
+        sock.sendto(packet, (ip, 137))
+        data, _ = sock.recvfrom(1024)
+        sock.close()
+        if len(data) > 56:
+            num_names = data[56]
+            offset = 57
+            for _ in range(num_names):
+                if offset + 18 <= len(data):
+                    name_bytes = data[offset:offset+15]
+                    name = name_bytes.decode("ascii", errors="ignore").strip()
+                    offset += 18
+                    if name and not name.startswith("__MSBROWSE__") and not name.startswith("IS~"):
+                        return name
+    except Exception:
+        pass
+    return ""
+
 # ---------------------------------------------------------------------------
 # Cross-Platform Local Subnet & Network Discovery
 # ---------------------------------------------------------------------------
@@ -2087,6 +2145,12 @@ def scan_device(ip: str, mac: str, config: "ScanConfig", upnp_cache: Dict, onvif
     except Exception:
         dev.hostname = ""
 
+    # Fallback: Query NetBIOS Name Service (UDP 137) if DNS reverse lookup returned empty
+    if not dev.hostname:
+        nb_name = probe_netbios_name(ip, timeout=0.25)
+        if nb_name:
+            dev.hostname = nb_name
+
     # Lookup OUI Vendor
     v_name, v_cat, _ = lookup_vendor(mac)
     dev.vendor = v_name
@@ -2208,9 +2272,19 @@ def scan_device(ip: str, mac: str, config: "ScanConfig", upnp_cache: Dict, onvif
     elif dev.vendor_category == "IOT_CHIP":
         dev.device_type = "IoT Controller / Chipset"
     elif dev.vendor_category == "RANDOMIZED":
-        dev.device_type = "Smartphone / Tablet (Private MAC)"
-        if not dev.hostname:
-            dev.hostname = "Guest Smartphone / Tablet"
+        inferred = infer_mobile_brand(dev.hostname) if dev.hostname else None
+        if inferred:
+            dev.device_type = f"{inferred} (Private MAC)"
+            dev.vendor = f"{inferred} (Private Wi-Fi MAC)"
+        else:
+            dev.device_type = "Smartphone (Private MAC)"
+            if not dev.hostname:
+                dev.hostname = "Guest Smartphone / Tablet"
+    elif infer_mobile_brand(dev.hostname):
+        inferred = infer_mobile_brand(dev.hostname)
+        dev.device_type = f"{inferred} Device"
+        if not dev.vendor or dev.vendor == "Unknown Manufacturer":
+            dev.vendor = f"{inferred} Manufacturer"
     elif dev.vendor_category == "SMART_DISPLAY":
         dev.device_type = "Smart Display / Assistant"
     elif dev.vendor_category == "SMART_GLASSES":
@@ -2418,13 +2492,15 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
         elif dev.is_local:
             ip_label += " (You)"
 
-        dev_type = getattr(dev, "device_type", "Network Device")[:27]
+        dev_type = getattr(dev, "device_type", "Network Device")[:28]
         safe_print(f"{ip_label:<18} {dev_type:<28} {dev.mac:<18} {risk_cell} {score_cell} {vendor_display:<28}")
 
         # Minimal info details line for every connected device
         extra_details = []
         if dev.hostname and dev.hostname != dev_type:
             extra_details.append(f"Host: '{dev.hostname}'")
+        if dev.vendor_category == "RANDOMIZED":
+            extra_details.append("Private Wi-Fi Address (Randomized MAC)")
         if dev.open_ports:
             ports_summary = ", ".join(str(p) for p in dev.open_ports[:6])
             if len(dev.open_ports) > 6:

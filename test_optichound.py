@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from optichound import (
     lookup_vendor,
+    infer_mobile_brand,
     normalize_mac,
     is_randomized_mac,
     evaluate_device_risk,
@@ -89,6 +90,14 @@ class TestOUIAndVendor(unittest.TestCase):
         # Unknown
         vendor, cat, weight = lookup_vendor("99:99:99:11:22:33")
         self.assertEqual(cat, "BENIGN")
+
+    def test_infer_mobile_brand(self):
+        self.assertEqual(infer_mobile_brand("Balaji's iPhone"), "Apple iPhone")
+        self.assertEqual(infer_mobile_brand("Galaxy-S22-Ultra"), "Samsung Galaxy")
+        self.assertEqual(infer_mobile_brand("Pixel-7a"), "Google Pixel")
+        self.assertEqual(infer_mobile_brand("OnePlus9"), "OnePlus")
+        self.assertEqual(infer_mobile_brand("Redmi-Note-10"), "Xiaomi / Redmi")
+        self.assertIsNone(infer_mobile_brand("Generic-PC"))
 
 
 class TestRiskScoringEngine(unittest.TestCase):
