@@ -16,7 +16,20 @@ OpticHound is a portable, zero-dependency Python tool designed to help travelers
   - **Multicast UPnP / SSDP**: Sends M-SEARCH queries (`239.255.255.250:1900`) and downloads device XML descriptors to discover `friendlyName`, `model`, and `DigitalSecurityCamera` declarations.
   - **ONVIF WS-Discovery**: Sends SOAP XML probe multicast (`239.255.255.250:3702`) to trigger instant responses from ONVIF IP security cameras.
   - **mDNS / Zeroconf**: Probes `_rtsp._tcp`, `_axis-video._tcp`, `_http._tcp`, and `_hap._tcp` services.
-- **Embedded Camera & IoT OUI Database**: Over 200 curated MAC vendor prefixes (Hikvision, Dahua, Wyze, Ring, Arlo, Reolink, Axis, Foscam, Amcrest, Eufy, Lorex, Tuya, Espressif ESP32-CAM, Xiongmai, HiSilicon, Allwinner).
+- **Embedded Camera & IoT OUI Database**: Over 200 curated MAC vendor prefixes (Hikvision, Dahua, Wyze, Ring, Arlo, Reolink, Axis, Foscam, Amcrest, Eufy, Lorex, Tuya, Espressif ESP32-CAM, Xiongmai, HiSilicon, Allwinner, Luxottica Tristar, Meta Platforms).
+- **Smart Glasses & AI Eyewear Detection (Meta Ray-Ban / Snap / Echo Frames)**:
+  - **Bluetooth Low Energy (BLE) Beacon Sniffer**: Monitors active broadcast advertisements and matches Bluetooth SIG Manufacturer Company IDs:
+    - `0x0D53`: Luxottica Group S.p.A. (Ray-Ban Meta, Ray-Ban Stories)
+    - `0x058E` / `0x01AB`: Meta Platforms Technologies (Meta AI Wearables)
+    - `0x03C2`: Snap Inc. (Snap Spectacles HD dual-camera glasses)
+    - `0x0171`: Amazon.com Services LLC (Echo Frames)
+    - `0x08A9`: Even Realities G1 (Dual heads-up display)
+    - `0x0A9F`: Brilliant Labs Frame (Multimodal camera glasses)
+    - `0x0499`: Vuzix Corporation (Smart AR eyewear)
+    - `0x0602`: Solos Technology (Solos AirGo AI glasses)
+  - **RSSI Proximity Meter**: Evaluates received signal power (`Immediate Proximity < 1.5m` vs `Room Vicinity 1.5–4m`) to alert travelers when active recording glasses are in the immediate room.
+  - **In-Air Direct Sync Wi-Fi Hotspots**: Detects transient P2P sync networks (`Ray-Ban-*`, `meta-view-*`, `spectacles-*`) used to offload captured video clips.
+  - **Zero External Python Libraries**: Runs using native Windows WinRT APIs on Windows, `bluetoothctl` on Linux, and `system_profiler` on macOS.
 - **Deep Protocol Probing**:
   - **Live Unauthenticated Snapshot Grabber**: Probes open camera HTTP endpoints (`/snapshot.jpg`, `/jpg/image.jpg`, `/webcapture.jpg`, etc.) and downloads live image frames as optical proof, automatically embedded as base64 thumbnails in the HTML report.
   - **Over-the-Air Rogue Wi-Fi Hunter**: Scans ambient wireless beacons for rogue P2P spy camera APs (`Care-AP-*`, `HD-MINI-CAM-*`, `LookCam-*`, `v380_*`, `ESP32-CAM-*`) that are not joined to the property router, cross-referenced with vendor OUI heuristics on Windows (`netsh`), macOS (`airport`), and Linux (`nmcli`/`iwlist`).
@@ -89,6 +102,8 @@ OpticHound scores every discovered device on an additive scale from 0 to 100 bas
 | Indicator | Evidence | Points |
 | :--- | :--- | :---: |
 | **Captured Live Snapshot** | Unauthenticated optical image downloaded from camera endpoint | **+50** |
+| **BLE Smart Glasses Beacon** | Manufacturer CID matches Luxottica / Meta / Snap / Echo Frames | **+75 to +85** |
+| **Smart Glasses Sync Hotspot** | Ambient Wi-Fi SSID matches smart glasses P2P sync (`ray-ban`, `meta-view`) | **+55** |
 | **Active RTSP Stream** | Responded to RTSP `OPTIONS` / `DESCRIBE` handshake | **+45** |
 | **ONVIF Camera Probe** | Responded to WS-Discovery `NetworkVideoTransmitter` | **+45** |
 | **In-Air Rogue Spy AP** | Ambient Wi-Fi SSID matches covert camera pattern (`Care-AP`, `HD-MINI`) | **+45** |
@@ -121,7 +136,7 @@ OpticHound scores every discovered device on an additive scale from 0 to 100 bas
 usage: optichound.py [-h] [-q] [-d] [-s SUBNET] [-i INTERFACE] [-t TIMEOUT]
                      [--threads THREADS] [--ports PORTS] [-o HTML] [--no-html]
                      [--json JSON] [--no-color] [-a] [--no-air-scan]
-                     [--snapshots] [--no-snapshots] [--mock]
+                     [-b] [--no-ble] [--snapshots] [--no-snapshots] [--mock]
 
 Options:
   -h, --help            Show help message and exit
@@ -138,6 +153,8 @@ Options:
   --no-color            Disable terminal ANSI color formatting
   -a, --air-scan        Scan ambient over-the-air Wi-Fi for rogue spy camera APs (default: True)
   --no-air-scan         Disable ambient over-the-air Wi-Fi hotspot scan
+  -b, --ble             Scan Bluetooth Low Energy (BLE) advertisements for smart glasses (default: True)
+  --no-ble              Disable Bluetooth Low Energy smart glasses scan
   --snapshots           Attempt unauthenticated snapshot image grabs on open HTTP ports (default: True)
   --no-snapshots        Disable unauthenticated snapshot image grab probing
   --mock                Run simulation mode with realistic hidden cameras
@@ -173,7 +190,10 @@ Even cameras that do not broadcast on Wi-Fi (such as battery-powered cameras rec
    - Hold your phone's flashlight at eye level next to your temple.
    - Sweep the room looking at picture frames, mirror edges, screws, and AC vents.
    - Glass camera lenses reflect light back into your eye, producing a bright bluish-purple or greenish glint.
-6. **If You Find a Camera**:
+6. **Smart Glasses & Camera Frames**:
+   - Inspect sunglasses or spectacles left resting on nightstands, desks, or charging docks.
+   - Look for unusually thick temple arms (housing battery and compute chips), front corner pinhole camera lenses adjacent to the frame hinges, and white privacy notification LEDs.
+7. **If You Find a Camera**:
    - **Do NOT tamper with or disconnect the camera**.
    - Photograph and record video of the device, capturing its location and angle in the room.
    - Leave the accommodation immediately.

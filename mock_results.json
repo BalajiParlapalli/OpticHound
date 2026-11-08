@@ -261,6 +261,23 @@
       "recommendation": "ROGUE IN-AIR SPY CAMERA DETECTED. Device is broadcasting its own hotspot. Search room fixtures (clocks, chargers, smoke detectors) immediately."
     },
     {
+      "ssid": "Ray-Ban-Stories-Sync-421",
+      "bssid": "38:47:12:a9:44:11",
+      "signal": "89%",
+      "security": "WPA2-Personal",
+      "channel": "6",
+      "vendor": "Luxottica Tristar / Ray-Ban Meta",
+      "vendor_category": "SMART_GLASSES",
+      "risk_level": "CRITICAL",
+      "score": 90,
+      "evidence": [
+        "Evidence(points=55, category='AIR_SSID', description=\"In-Air Wi-Fi Hotspot matches smart camera glasses: 'ray-ban' in 'Ray-Ban-Stories-Sync-421'\", details='Direct P2P Wi-Fi sync network used by Ray-Ban Meta camera glasses to offload high-resolution video clips to phone.')",
+        "Evidence(points=40, category='VENDOR', description='Hotspot BSSID matches hardware: Luxottica Tristar / Ray-Ban Meta (38:47:12)', details='Luxottica eyewear hardware manufacturing OUI prefix.')",
+        "Evidence(points=15, category='PROXIMITY', description='Strong Signal Strength (89%): Device in close physical proximity!', details='Transmitter is in the immediate room.')"
+      ],
+      "recommendation": "SMART GLASSES SYNC HOTSPOT DETECTED. Ray-Ban Meta smart glasses Wi-Fi direct network detected transferring video/media. Inspect immediate room for active camera glasses."
+    },
+    {
       "ssid": "HD-MINI-CAM-74f0",
       "bssid": "a0:92:08:74:f0:11",
       "signal": "84%",
@@ -289,6 +306,43 @@
       "score": 0,
       "evidence": [],
       "recommendation": "Primary authorized guest Wi-Fi access point."
+    }
+  ],
+  "wearables": [
+    {
+      "name": "Ray-Ban Stories / Meta View",
+      "address": "80:aa:1c:44:91:2f",
+      "device_type": "Ray-Ban Meta Smart Glasses",
+      "brand": "Luxottica Group S.p.A. / Meta",
+      "signal": "-58 dBm (Strong)",
+      "proximity": "Immediate Proximity (< 1.5m)",
+      "company_id": "0x0D53",
+      "protocol": "BLE Advertisement (Manufacturer CID 0x0D53)",
+      "risk_level": "CRITICAL",
+      "score": 95,
+      "evidence": [
+        "Evidence(points=85, category='BLE_SIG', description='Bluetooth SIG Manufacturer ID matches: Luxottica Group S.p.A. (0x0D53)', details='Hardware manufacturer of Ray-Ban Meta & Ray-Ban Stories AI camera glasses. Contains front-facing ultra-wide camera and spatial audio recording.')",
+        "Evidence(points=20, category='BLE_NAME', description=\"Bluetooth broadcast name matches camera glasses: 'Ray-Ban Stories / Meta View'\", details='Direct match for Ray-Ban Meta companion app sync protocol.')",
+        "Evidence(points=10, category='PROXIMITY', description='Signal Strength -58 dBm: Immediate Proximity (< 1.5m)', details='Device is actively operating in immediate physical space (worn by an individual in the room).')"
+      ],
+      "recommendation": "SMART CAMERA EYEWEAR DETECTED IN IMMEDIATE VICINITY. An individual nearby is wearing or carrying Ray-Ban Meta Smart Glasses equipped with video recording capabilities. Verify recording status indicator LED."
+    },
+    {
+      "name": "Snap Spectacles v3",
+      "address": "02:c4:9a:11:82:70",
+      "device_type": "Snap Spectacles Smart Camera Glasses",
+      "brand": "Snap Inc.",
+      "signal": "-74 dBm (Moderate)",
+      "proximity": "Room Vicinity (1.5 - 4m)",
+      "company_id": "0x03C2",
+      "protocol": "BLE Advertisement (Manufacturer CID 0x03C2)",
+      "risk_level": "HIGH",
+      "score": 80,
+      "evidence": [
+        "Evidence(points=85, category='BLE_SIG', description='Bluetooth SIG Manufacturer ID matches: Snap Inc. (0x03C2)', details='Dual HD stereoscopic video recording camera glasses.')",
+        "Evidence(points=20, category='BLE_NAME', description=\"Bluetooth broadcast name matches camera glasses: 'Snap Spectacles v3'\", details='Snapchat camera eyewear companion protocol.')"
+      ],
+      "recommendation": "SMART CAMERA GLASSES DETECTED. Dual stereoscopic video capture device detected in the room or adjacent area."
     }
   ]
 }

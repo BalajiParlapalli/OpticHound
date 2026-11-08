@@ -23,10 +23,15 @@ from optichound import (
     ScanConfig,
     generate_mock_devices,
     generate_mock_rogue_aps,
+    generate_mock_wearables,
+    evaluate_ble_wearable,
+    WearableDevice,
     PORT_SIGNATURES,
     CAMERA_PORTS_QUICK,
     SNAPSHOT_PATHS,
     SPY_CAM_SSID_KEYWORDS,
+    SMART_GLASSES_SSID_KEYWORDS,
+    SMART_GLASSES_BLE_SIGNATURES,
     RogueAP
 )
 
@@ -383,6 +388,114 @@ class TestAddonSnapshotAndRogueAP(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(base_dir, "TERMS.md")))
         self.assertTrue(os.path.exists(os.path.join(base_dir, "COOKIE_POLICY.md")))
         self.assertTrue(os.path.exists(os.path.join(base_dir, "SECURITY.md")))
+
+
+class TestSmartGlassesDetection(unittest.TestCase):
+    """
+    Test suite for Meta Glasses, Ray-Ban Stories, Snap Spectacles,
+    and AI camera smart eyewear detection mechanisms.
+    """
+
+    def test_oui_luxottica_and_meta(self):
+        # Luxottica Tristar OUI prefix
+        v1, cat1, w1 = lookup_vendor("38:47:12:ab:cd:ef")
+        self.assertIn("Luxottica", v1)
+        self.assertEqual(cat1, "SMART_GLASSES")
+        self.assertGreaterEqual(w1, 70)
+
+        # Luxottica Group S.p.A. OUI prefix
+        v2, cat2, w2 = lookup_vendor("98:59:49:00:11:22")
+        self.assertIn("Luxottica", v2)
+        self.assertEqual(cat2, "SMART_GLASSES")
+
+        # Meta Platforms Technologies OUI prefix
+        v3, cat3, w3 = lookup_vendor("c0:dd:8a:12:34:56")
+        self.assertIn("Meta Platforms", v3)
+        self.assertEqual(cat3, "SMART_WEARABLE")
+        self.assertGreaterEqual(w3, 60)
+
+    def test_evaluate_ble_wearable_rayban_meta(self):
+        # Luxottica Group Company ID 0x0D53
+        wearable = evaluate_ble_wearable(
+            addr="80:aa:1c:44:91:2f",
+            name="Ray-Ban Meta View",
+            rssi=-54,
+            company_ids=["0x0D53"]
+        )
+        self.assertIsNotNone(wearable)
+        self.assertEqual(wearable.device_type, "Ray-Ban Meta Smart Glasses")
+        self.assertEqual(wearable.risk_level, "CRITICAL")
+        self.assertGreaterEqual(wearable.score, 90)
+        self.assertIn("Immediate Proximity", wearable.proximity)
+        self.assertTrue(any(e.category == "BLE_SIG" for e in wearable.evidence))
+
+    def test_evaluate_ble_wearable_snap_spectacles(self):
+        # Snap Inc. Company ID 0x03C2
+        wearable = evaluate_ble_wearable(
+            addr="02:c4:9a:11:82:70",
+            name="Spectacles",
+            rssi=-72,
+            company_ids=["0x03C2"]
+        )
+        self.assertIsNotNone(wearable)
+        self.assertEqual(wearable.device_type, "Snap Spectacles Smart Camera Glasses")
+        self.assertEqual(wearable.risk_level, "CRITICAL")
+        self.assertIn("Snap Inc.", wearable.brand)
+
+    def test_evaluate_ble_wearable_benign_device(self):
+        # Generic headphones or mouse - unknown company ID and non-glasses name
+        wearable = evaluate_ble_wearable(
+            addr="00:1a:7d:aa:bb:cc",
+            name="Logitech MX Master",
+            rssi=-65,
+            company_ids=["0x000F"]
+        )
+        self.assertIsNone(wearable)
+
+    def test_smart_glasses_ssid_keywords(self):
+        self.assertIn("ray-ban", SMART_GLASSES_SSID_KEYWORDS)
+        self.assertIn("meta-view", SMART_GLASSES_SSID_KEYWORDS)
+        self.assertIn("spectacles", SMART_GLASSES_SSID_KEYWORDS)
+        self.assertIn("echo-frame", SMART_GLASSES_SSID_KEYWORDS)
+
+    def test_generate_mock_wearables(self):
+        wearables = generate_mock_wearables()
+        self.assertGreaterEqual(len(wearables), 1)
+        rayban = next((w for w in wearables if "Ray-Ban" in w.device_type), None)
+        self.assertIsNotNone(rayban)
+        self.assertEqual(rayban.risk_level, "CRITICAL")
+        self.assertGreater(len(rayban.evidence), 0)
+        self.assertTrue(len(rayban.recommendation) > 10)
+
+    def test_html_report_renders_wearables(self):
+        devices = generate_mock_devices()
+        rogue_aps = generate_mock_rogue_aps()
+        wearables = generate_mock_wearables()
+        config = ScanConfig(subnet_cidr="192.168.1.0/24")
+
+        with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as tmp:
+            tmp_path = tmp.name
+
+        try:
+            success = generate_html_report(
+                devices, config, duration=1.5,
+                filepath=tmp_path,
+                rogue_aps=rogue_aps,
+                wearables=wearables
+            )
+            self.assertTrue(success)
+            with open(tmp_path, "r", encoding="utf-8") as f:
+                html = f.read()
+
+            self.assertIn("Ray-Ban Meta Smart Glasses", html)
+            self.assertIn("Snap Spectacles Smart Camera Glasses", html)
+            self.assertIn("Immediate Proximity (< 1.5m)", html)
+            self.assertIn("Detected Smart Glasses &amp; Camera Eyewear", html)
+            self.assertIn("Smart Glasses &amp; Camera Frames", html)
+            self.assertIn("Eyewear Detected", html)
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
 
 if __name__ == "__main__":

@@ -309,6 +309,25 @@ OUI_DATABASE = {
     "40b4cd": ("Google Nest Labs", "CAM_BRAND", 25),
     "a47733": ("Google Nest Labs", "CAM_BRAND", 25),
 
+    # Luxottica (Ray-Ban Meta / Ray-Ban Stories Smart Glasses)
+    "384712": ("Luxottica Tristar / Ray-Ban Meta Glasses", "SMART_GLASSES", 80),
+    "80aa1c": ("Luxottica Tristar / Ray-Ban Meta", "SMART_GLASSES", 80),
+    "985949": ("Luxottica Group S.P.A. (Smart Eyewear)", "SMART_GLASSES", 75),
+
+    # Meta Platforms / Facebook Technologies (Wearables / Quest / Smart Eyewear)
+    "c0dd8a": ("Meta Platforms Technologies (Wearables/Quest)", "SMART_WEARABLE", 65),
+    "4857dd": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "a40e2b": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "78c4fa": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "480560": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "882508": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "94f929": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "b417a8": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "80f3ef": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "8457f7": ("Meta Platforms Technologies", "SMART_WEARABLE", 60),
+    "28704e": ("Meta Platforms / Facebook", "SMART_WEARABLE", 60),
+    "70ee50": ("Meta Platforms / Facebook", "SMART_WEARABLE", 60),
+
     # Espressif Systems (ESP8266 / ESP32-CAM - DIY Covert Spy Cameras)
     "18fe34": ("Espressif Inc (ESP32-CAM / IoT)", "IOT_CHIP", 25),
     "240ac4": ("Espressif Inc (ESP32-CAM / IoT)", "IOT_CHIP", 25),
@@ -569,15 +588,109 @@ SPY_CAM_SSID_KEYWORDS = [
     "dvr-", "dvr_", "camera", "cctv", "xiaovv", "espcam", "esp32", "live-feed"
 ]
 
+# Smart glasses and wearable camera Wi-Fi SSID broadcast keywords (P2P / Direct / Sync)
+SMART_GLASSES_SSID_KEYWORDS = [
+    "ray-ban", "rayban", "meta-view", "meta_view", "meta-glass", "metaglass",
+    "stories-", "stories_", "spectacles", "echo-frame", "echo_frame", "vuzix",
+    "even-realities", "even_realities", "solos-airgo", "solos_airgo"
+]
+
+# Bluetooth SIG assigned Company Identifiers for Smart Glasses & Camera Eyewear
+SMART_GLASSES_BLE_SIGNATURES: Dict[int, Tuple[str, str, str, int]] = {
+    # Company ID -> (Brand / Manufacturer, Device Model, Description, Base Score Weight)
+    0x0D53: (
+        "Luxottica Group S.p.A.",
+        "Ray-Ban Meta Smart Glasses",
+        "Official hardware manufacturer of Ray-Ban Meta & Ray-Ban Stories AI camera glasses. Equipped with 12MP camera & spatial mic array.",
+        85
+    ),
+    0x058E: (
+        "Meta Platforms Technologies, LLC",
+        "Meta Smart Wearable / AI Glasses",
+        "Meta hardware division responsible for smart glasses and spatial wearables.",
+        80
+    ),
+    0x01AB: (
+        "Meta Platforms, Inc.",
+        "Meta Smart Wearable Device",
+        "Meta corporate Bluetooth identity used across companion wearable sensors and smart eyewear.",
+        75
+    ),
+    0x03C2: (
+        "Snap Inc.",
+        "Snap Spectacles Smart Camera Glasses",
+        "Snapchat dual HD stereoscopic camera glasses designed for hands-free video recording.",
+        85
+    ),
+    0x0171: (
+        "Amazon.com Services LLC",
+        "Amazon Echo Frames (Smart Eyewear)",
+        "Alexa-enabled smart frames equipped with directional microphones and voice interface.",
+        60
+    ),
+    0x05D6: (
+        "Zhuhai Jieli Technology Co.",
+        "AI Smart Glasses / Audio Wearable",
+        "Silicon chipset widely deployed across OEM camera and audio smart glasses.",
+        70
+    ),
+    0x08A9: (
+        "Even Realities",
+        "Even Realities G1 Smart Glasses",
+        "Dual micro-LED heads-up display smart glasses with ambient sensors.",
+        65
+    ),
+    0x0A9F: (
+        "Brilliant Labs",
+        "Brilliant Labs Frame (Multimodal AI Glasses)",
+        "Open-source multimodal AI smart glasses with integrated high-resolution camera.",
+        80
+    ),
+    0x0499: (
+        "Vuzix Corporation",
+        "Vuzix Smart Glasses / AR Eyewear",
+        "Enterprise and consumer AR glasses equipped with built-in camera and sensors.",
+        75
+    ),
+    0x0602: (
+        "Solos Technology Limited",
+        "Solos AirGo Smart Glasses",
+        "Smart audio & AI eyewear with voice intelligence and camera integration.",
+        65
+    )
+}
+
+# Local Bluetooth advertising name keywords for smart glasses
+SMART_GLASSES_NAME_KEYWORDS = [
+    "ray-ban", "rayban", "meta view", "metaview", "meta glass", "stories",
+    "spectacles", "echo frames", "vuzix", "even realities", "brilliant frame",
+    "solos airgo", "rokid", "xreal", "audio frames", "camera glass"
+]
+
 # ---------------------------------------------------------------------------
 # Data Models
 # ---------------------------------------------------------------------------
 @dataclass
 class Evidence:
     points: int
-    category: str  # 'STREAM', 'PROTOCOL', 'VENDOR', 'WEB', 'UPNP', 'MDNS', 'PORT', 'SNAPSHOT', 'AIR_SSID'
+    category: str  # 'STREAM', 'PROTOCOL', 'VENDOR', 'WEB', 'UPNP', 'MDNS', 'PORT', 'SNAPSHOT', 'AIR_SSID', 'BLE_SIG', 'BLE_NAME'
     description: str
     details: str = ""
+
+@dataclass
+class WearableDevice:
+    name: str = ""
+    address: str = "Unknown"
+    device_type: str = "Smart Glasses / AI Eyewear"
+    brand: str = "Luxottica / Meta"
+    signal: str = "N/A"
+    proximity: str = "Unknown"
+    company_id: str = ""
+    protocol: str = "BLE Advertisement"
+    risk_level: str = "CRITICAL"
+    score: int = 85
+    evidence: List[Evidence] = field(default_factory=list)
+    recommendation: str = ""
 
 @dataclass
 class RogueAP:
@@ -1368,13 +1481,27 @@ def scan_air_rogue_aps() -> List[RogueAP]:
         ap.vendor_category = v_cat
 
         ssid_lower = ap.ssid.lower()
+        matched_glasses_kw = None
+        for kw in SMART_GLASSES_SSID_KEYWORDS:
+            if kw in ssid_lower:
+                matched_glasses_kw = kw
+                break
+
         matched_kw = None
         for kw in SPY_CAM_SSID_KEYWORDS:
             if kw in ssid_lower:
                 matched_kw = kw
                 break
 
-        if matched_kw:
+        if matched_glasses_kw:
+            score += 50
+            ap.evidence.append(Evidence(
+                points=50,
+                category="AIR_SSID",
+                description=f"In-Air Wi-Fi Hotspot matches Smart Glasses / Eyewear: '{matched_glasses_kw}' in '{ap.ssid}'",
+                details="Direct P2P or setup Wi-Fi broadcasted by camera smart glasses (Ray-Ban Meta / Spectacles) during sync."
+            ))
+        elif matched_kw:
             score += 45
             ap.evidence.append(Evidence(
                 points=45,
@@ -1383,7 +1510,15 @@ def scan_air_rogue_aps() -> List[RogueAP]:
                 details="Common factory default SSID for covert mini spy cameras operating in P2P mode."
             ))
 
-        if v_cat in ("CAM_BRAND", "IOT_CHIP"):
+        if v_cat in ("SMART_GLASSES", "SMART_WEARABLE"):
+            score += 40
+            ap.evidence.append(Evidence(
+                points=40,
+                category="VENDOR",
+                description=f"Hotspot BSSID matches Smart Glasses Hardware: {v_name}",
+                details="Transmitter MAC prefix belongs to Ray-Ban Meta or smart wearable camera manufacturer."
+            ))
+        elif v_cat in ("CAM_BRAND", "IOT_CHIP"):
             score += 30
             ap.evidence.append(Evidence(
                 points=30,
@@ -1393,13 +1528,13 @@ def scan_air_rogue_aps() -> List[RogueAP]:
             ))
 
         if "open" in ap.security.lower() or "none" in ap.security.lower():
-            if matched_kw or v_cat in ("CAM_BRAND", "IOT_CHIP"):
+            if matched_glasses_kw or matched_kw or v_cat in ("SMART_GLASSES", "SMART_WEARABLE", "CAM_BRAND", "IOT_CHIP"):
                 score += 20
                 ap.evidence.append(Evidence(
                     points=20,
                     category="SECURITY",
                     description="Unencrypted Open Wi-Fi Network",
-                    details="Anyone within radio range can connect directly to this camera hotspot."
+                    details="Anyone within radio range can connect directly to this wireless hotspot."
                 ))
 
         sig_val = 0
@@ -1424,10 +1559,13 @@ def scan_air_rogue_aps() -> List[RogueAP]:
         ap.score = min(score, 100)
         if ap.score >= 60:
             ap.risk_level = "CRITICAL"
-            ap.recommendation = "ROGUE IN-AIR SPY CAMERA DETECTED. Device is broadcasting its own hotspot. Search room fixtures (clocks, chargers, smoke detectors) immediately."
+            if matched_glasses_kw or v_cat in ("SMART_GLASSES", "SMART_WEARABLE"):
+                ap.recommendation = "SMART CAMERA GLASSES HOTSPOT DETECTED. Outward video/audio eyewear is actively transmitting nearby."
+            else:
+                ap.recommendation = "ROGUE IN-AIR SPY CAMERA DETECTED. Device is broadcasting its own hotspot. Search room fixtures (clocks, chargers, smoke detectors) immediately."
         elif ap.score >= 35:
             ap.risk_level = "HIGH"
-            ap.recommendation = "SUSPICIOUS WIRELESS HOTSPOT. SSID or BSSID matches covert IoT camera hardware."
+            ap.recommendation = "SUSPICIOUS WIRELESS HOTSPOT. SSID or BSSID matches covert IoT camera or smart wearable hardware."
         elif ap.score >= 20:
             ap.risk_level = "MEDIUM"
             ap.recommendation = "POTENTIAL IOT BEACON. Monitor signal strength."
@@ -1438,6 +1576,243 @@ def scan_air_rogue_aps() -> List[RogueAP]:
         evaluated_aps.append(ap)
 
     return sorted(evaluated_aps, key=lambda x: x.score, reverse=True)
+
+# ---------------------------------------------------------------------------
+# Bluetooth Low Energy (BLE) Smart Glasses & Wearable Detection
+# ---------------------------------------------------------------------------
+def evaluate_ble_wearable(addr: str, name: str, rssi: int, company_ids: List[str]) -> Optional[WearableDevice]:
+    """
+    Evaluate detected Bluetooth Low Energy device against known smart glasses signatures
+    including Meta Ray-Ban, Snap Spectacles, Echo Frames, Even Realities, and Brilliant Labs.
+    """
+    matched_brand = None
+    device_type = "Smart Eyewear / Camera Wearable"
+    score = 0
+    evidence = []
+    company_id_str = ""
+
+    # 1. Check Bluetooth SIG Company Identifiers in Manufacturer-Specific Data
+    for cid in company_ids:
+        try:
+            val = int(cid, 16) if isinstance(cid, str) and cid.startswith("0x") else int(cid)
+            if val in SMART_GLASSES_BLE_SIGNATURES:
+                b_name, d_type, desc, w = SMART_GLASSES_BLE_SIGNATURES[val]
+                matched_brand = b_name
+                device_type = d_type
+                score += w
+                company_id_str = f"{cid} ({b_name})"
+                evidence.append(Evidence(
+                    points=w,
+                    category="BLE_SIG",
+                    description=f"Bluetooth SIG Manufacturer ID matches: {cid} ({b_name})",
+                    details=desc
+                ))
+                break
+        except Exception:
+            pass
+
+    # 2. Check Advertised Local Name Keywords
+    name_lower = name.lower() if name else ""
+    matched_kw = None
+    for kw in SMART_GLASSES_NAME_KEYWORDS:
+        if kw in name_lower:
+            matched_kw = kw
+            break
+
+    if matched_kw:
+        score += 45
+        if not matched_brand:
+            matched_brand = name
+            device_type = f"Smart Glasses ({name})"
+        evidence.append(Evidence(
+            points=45,
+            category="BLE_NAME",
+            description=f"Bluetooth Broadcast Name matches smart eyewear: '{name}' (pattern: '{matched_kw}')",
+            details="Device advertises directly as camera-equipped smart glasses / smart frames."
+        ))
+
+    # 3. Check MAC OUI against Luxottica and Meta hardware blocks
+    norm_mac = normalize_mac(addr).replace(":", "")
+    for prefix, (vname, vcat, vweight) in OUI_DATABASE.items():
+        if norm_mac.startswith(prefix.lower()):
+            if vcat in ("SMART_GLASSES", "SMART_WEARABLE"):
+                score += 35
+                if not matched_brand:
+                    matched_brand = vname
+                    device_type = "Smart Eyewear / Camera Wearable"
+                evidence.append(Evidence(
+                    points=35,
+                    category="VENDOR",
+                    description=f"Bluetooth MAC OUI matches wearable vendor: {vname}",
+                    details="Manufacturer specializes in smart glasses or spatial computing."
+                ))
+                break
+
+    if score == 0:
+        return None
+
+    # 4. Proximity & RSSI Distance Heuristics
+    prox_label = "Unknown Proximity"
+    if rssi > -60:
+        prox_label = "Immediate Proximity (< 1.5m)"
+        score += 20
+        evidence.append(Evidence(
+            points=20,
+            category="PROXIMITY",
+            description=f"Immediate Physical Proximity (RSSI: {rssi} dBm): Transmitting within 1-2 meters!",
+            details="Very strong signal indicates someone is wearing, operating, or holding the device directly next to you."
+        ))
+    elif rssi >= -75:
+        prox_label = "Close Proximity (1.5 - 4m)"
+        score += 10
+        evidence.append(Evidence(
+            points=10,
+            category="PROXIMITY",
+            description=f"Close Physical Proximity (RSSI: {rssi} dBm): Transmitting in room vicinity.",
+            details="Device is actively operating inside the current suite or adjacent space."
+        ))
+    else:
+        prox_label = "Moderate Proximity (> 4m)"
+
+    risk_level = "CRITICAL" if score >= 75 else "HIGH" if score >= 45 else "MEDIUM"
+    
+    brand_lower = (matched_brand or "").lower()
+    if "ray-ban" in brand_lower or "luxottica" in brand_lower:
+        rec = "ACTIVE SMART CAMERA GLASSES DETECTED. An active pair of Ray-Ban Meta smart glasses is transmitting nearby. Check for privacy LED indicator on outer frame hinge."
+    elif "snap" in brand_lower:
+        rec = "SNAP SPECTACLES DETECTED. Wearable dual-camera glasses broadcasting nearby."
+    elif "echo" in brand_lower or "amazon" in brand_lower:
+        rec = "AMAZON ECHO FRAMES DETECTED. Smart audio glasses with directional microphones nearby."
+    else:
+        rec = "SMART WEARABLE / AI GLASSES DETECTED. Bluetooth radio signals indicate camera or microphone-equipped eyewear in proximity."
+
+    return WearableDevice(
+        name=name or (matched_brand or "Smart Glasses"),
+        address=addr,
+        device_type=device_type,
+        brand=matched_brand or "Smart Eyewear Manufacturer",
+        signal=f"{rssi} dBm" if rssi != -100 else "Active",
+        proximity=prox_label,
+        company_id=company_id_str,
+        protocol="BLE Advertisement",
+        risk_level=risk_level,
+        score=min(score, 100),
+        evidence=evidence,
+        recommendation=rec
+    )
+
+def scan_ble_wearables(timeout_secs: float = 3.0) -> List[WearableDevice]:
+    """
+    Scan nearby Bluetooth Low Energy (BLE) broadcast advertisements to detect
+    smart glasses (Ray-Ban Meta, Snap Spectacles, Echo Frames, etc.) and AI camera eyewear.
+    Uses native Windows WinRT APIs on Windows, bluetoothctl on Linux, system_profiler on macOS.
+    Zero external packages required.
+    """
+    wearables: List[WearableDevice] = []
+    os_type = platform.system().lower()
+
+    if "windows" in os_type:
+        try:
+            ps_script = f"""
+$ErrorActionPreference = 'SilentlyContinue'
+$found = @()
+try {{
+    [Windows.Devices.Bluetooth.BluetoothAdapter, Windows.Devices.Bluetooth, ContentType = WindowsRuntime] | Out-Null
+    $op = [Windows.Devices.Bluetooth.BluetoothAdapter]::GetDefaultAsync()
+    $adapter = $null
+    $t = 0
+    while ($op.Status -eq 'Started' -and $t -lt 15) {{ Start-Sleep -Milliseconds 100; $t++ }}
+    if ($op.Status -eq 'Completed') {{ $adapter = $op.GetResults() }}
+    
+    if ($adapter -and $adapter.IsLowEnergySupported) {{
+        [Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementWatcher, Windows.Devices.Bluetooth, ContentType = WindowsRuntime] | Out-Null
+        $w = New-Object Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementWatcher
+        $w.ScanningMode = [Windows.Devices.Bluetooth.Advertisement.BluetoothLEScanningMode]::Active
+        $map = [System.Collections.Concurrent.ConcurrentDictionary[string, PSObject]]::new()
+        
+        $handler = [Windows.Foundation.TypedEventHandler[Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementWatcher, Windows.Devices.Bluetooth.Advertisement.BluetoothLEAdvertisementReceivedEventArgs]]{{
+            param($s, $e)
+            $cids = @()
+            foreach ($m in $e.Advertisement.ManufacturerData) {{
+                $cids += ('0x{0:X4}' -f $m.CompanyId)
+            }}
+            $hex = ('{0:X12}' -f $e.BluetoothAddress) -replace '..(?!$)', '$&:'
+            $map[$hex] = [PSCustomObject]@{{
+                Address = $hex
+                Name = $e.Advertisement.LocalName
+                RSSI = $e.RawSignalStrengthInDBm
+                CompanyIds = $cids
+            }}
+        }}
+        $token = $w.add_Received($handler)
+        $w.Start()
+        Start-Sleep -Seconds {int(timeout_secs)}
+        $w.Stop()
+        $w.remove_Received($token)
+        $found = @($map.Values)
+    }}
+}} catch {{}}
+ConvertTo-Json @($found) -Compress
+"""
+            res = subprocess.run(
+                ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_script],
+                capture_output=True,
+                text=True,
+                timeout=timeout_secs + 6
+            )
+            raw = res.stdout.strip()
+            if raw and (raw.startswith("[") or raw.startswith("{")):
+                parsed = json.loads(raw)
+                items = parsed if isinstance(parsed, list) else [parsed]
+                for item in items:
+                    addr = item.get("Address", "Unknown")
+                    name = item.get("Name", "") or ""
+                    rssi = item.get("RSSI", -100)
+                    cids = item.get("CompanyIds", [])
+                    if isinstance(cids, str):
+                        cids = [cids]
+
+                    evaluated = evaluate_ble_wearable(addr, name, rssi, cids)
+                    if evaluated:
+                        wearables.append(evaluated)
+        except Exception:
+            pass
+
+    elif "linux" in os_type:
+        try:
+            cmd = f"timeout {int(timeout_secs)} bluetoothctl --timeout {int(timeout_secs)} scan on"
+            subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            out = subprocess.check_output("bluetoothctl devices", shell=True, text=True, stderr=subprocess.DEVNULL)
+            for line in out.splitlines():
+                parts = line.strip().split(maxsplit=2)
+                if len(parts) >= 3 and parts[0] == "Device":
+                    addr = parts[1]
+                    name = parts[2]
+                    evaluated = evaluate_ble_wearable(addr, name, -70, [])
+                    if evaluated:
+                        wearables.append(evaluated)
+        except Exception:
+            pass
+
+    elif "darwin" in os_type:  # macOS
+        try:
+            out = subprocess.check_output(["system_profiler", "SPBluetoothDataType"], text=True, stderr=subprocess.DEVNULL)
+            current_device = ""
+            for line in out.splitlines():
+                line = line.strip()
+                if line.endswith(":") and not any(k in line.lower() for k in ["apple", "controller", "hardware", "services", "settings"]):
+                    current_device = line[:-1]
+                elif "address:" in line.lower() and current_device:
+                    addr = line.split(":", 1)[1].strip()
+                    evaluated = evaluate_ble_wearable(addr, current_device, -70, [])
+                    if evaluated:
+                        wearables.append(evaluated)
+                    current_device = ""
+        except Exception:
+            pass
+
+    # Sort wearables by score (descending)
+    return sorted(wearables, key=lambda x: x.score, reverse=True)
 
 # ---------------------------------------------------------------------------
 # Risk Scoring & Assessment Engine
@@ -1506,6 +1881,22 @@ def evaluate_device_risk(dev: DeviceReport) -> DeviceReport:
             category="VENDOR",
             description=f"MAC OUI matched security camera brand: {dev.vendor}",
             details="Hardware manufacturer produces dedicated surveillance cameras and security gear."
+        ))
+    elif dev.vendor_category == "SMART_GLASSES":
+        score += 45
+        dev.evidence.append(Evidence(
+            points=45,
+            category="VENDOR",
+            description=f"Smart Glasses Hardware Vendor: {dev.vendor}",
+            details="Hardware MAC prefix belongs to Ray-Ban Meta or smart wearable eyewear equipped with video camera and microphones."
+        ))
+    elif dev.vendor_category == "SMART_WEARABLE":
+        score += 35
+        dev.evidence.append(Evidence(
+            points=35,
+            category="VENDOR",
+            description=f"Smart Wearable Hardware: {dev.vendor}",
+            details="Meta hardware platform for smart glasses and spatial computing."
         ))
     elif dev.vendor_category == "IOT_CHIP":
         # Covert spy cams commonly use Espressif or Tuya modules
@@ -1654,7 +2045,13 @@ def evaluate_device_risk(dev: DeviceReport) -> DeviceReport:
     dev.score = score
 
     # Classify Risk Level
-    if score >= 75:
+    if dev.vendor_category == "SMART_GLASSES":
+        dev.risk_level = "CRITICAL" if score >= 75 else "HIGH"
+        dev.recommendation = "SMART EYEWEAR DETECTED. Ray-Ban Meta or smart camera glasses identified on network. Device features outward-facing video camera and microphone array."
+    elif dev.vendor_category == "SMART_WEARABLE":
+        dev.risk_level = "HIGH" if score >= 50 else "MEDIUM"
+        dev.recommendation = "SMART WEARABLE DETECTED. Meta spatial wearable / AI glasses platform identified."
+    elif score >= 75:
         dev.risk_level = "CRITICAL"
         dev.recommendation = "CONFIRMED SURVEILLANCE DEVICE. Immediate physical inspection recommended. Locate lens and report to booking platform if undeclared."
     elif score >= 50:
@@ -1816,6 +2213,14 @@ def scan_device(ip: str, mac: str, config: "ScanConfig", upnp_cache: Dict, onvif
             dev.hostname = "Guest Smartphone / Tablet"
     elif dev.vendor_category == "SMART_DISPLAY":
         dev.device_type = "Smart Display / Assistant"
+    elif dev.vendor_category == "SMART_GLASSES":
+        dev.device_type = "Smart Glasses (Ray-Ban Meta / Luxottica)"
+        if not dev.hostname:
+            dev.hostname = "Ray-Ban Meta Eyewear"
+    elif dev.vendor_category == "SMART_WEARABLE":
+        dev.device_type = "Meta Smart Wearable / Glasses"
+        if not dev.hostname:
+            dev.hostname = "Meta Wearable Device"
     elif "Gaoshengda" in dev.vendor or "Roku" in dev.vendor or "TV" in dev.vendor:
         dev.device_type = "Smart TV / Streaming Device"
         if not dev.hostname:
@@ -1859,6 +2264,7 @@ class ScanConfig:
     threads: int = 64
     custom_ports: Optional[List[int]] = None
     air_scan: bool = True
+    ble_scan: bool = True
     snapshot_audit: bool = True
     output_html: Optional[str] = None
     no_html: bool = False
@@ -1891,7 +2297,7 @@ def print_banner():
     except Exception:
         safe_print("\n[+] OpticHound v2.0 - Hidden Camera & Surveillance Detector\n")
 
-def print_terminal_report(results: List[DeviceReport], config: ScanConfig, duration: float, rogue_aps: Optional[List[RogueAP]] = None):
+def print_terminal_report(results: List[DeviceReport], config: ScanConfig, duration: float, rogue_aps: Optional[List[RogueAP]] = None, wearables: Optional[List[WearableDevice]] = None):
     """
     Render beautiful, color-coded terminal report with alerts and device cards.
     """
@@ -1899,6 +2305,7 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
     high_count = sum(1 for d in results if d.risk_level == "HIGH")
     medium_count = sum(1 for d in results if d.risk_level == "MEDIUM")
     low_safe_count = len(results) - (critical_count + high_count + medium_count)
+    wearable_count = len(wearables) if wearables else 0
 
     div = "=" * 78
     sub_div = "-" * 78
@@ -1908,6 +2315,8 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
     safe_print(f"{C.BOLD}{div}{C.RESET}")
 
     stat_line = f" Total Devices: {C.BOLD}{len(results)}{C.RESET} | "
+    if wearable_count > 0:
+        stat_line += f"{C.BG_RED} Smart Glasses: {wearable_count} {C.RESET} | "
     if critical_count > 0:
         stat_line += f"{C.BG_RED} CRITICAL: {critical_count} {C.RESET} | "
     else:
@@ -1945,6 +2354,22 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
             for ev in dev.evidence:
                 safe_print(f"       * {C.YELLOW}[+{ev.points} pts]{C.RESET} {ev.description}")
             safe_print(f"     {C.BOLD}Action:{C.RESET} {dev.recommendation}\n")
+
+    # Smart Glasses & AI Camera Eyewear Alerts
+    if wearables:
+        safe_print(f"\n{C.BG_RED} [!] SMART GLASSES & CAMERA EYEWEAR DETECTED IN PROXIMITY {C.RESET}\n")
+        safe_print(f" {C.YELLOW}WARNING: Active smart glasses (Meta Ray-Ban / Snap Spectacles) detected nearby!{C.RESET}")
+        safe_print(" These wearable devices contain outward-facing cameras and directional audio microphones.\n")
+        for w in wearables:
+            badge_color = C.BG_RED if w.risk_level == "CRITICAL" else C.BG_YELLOW
+            safe_print(f" {badge_color} {w.risk_level} {C.RESET} {C.BOLD}{w.device_type}{C.RESET} ({w.address}) - {C.CYAN}{w.brand}{C.RESET}")
+            safe_print(f"     Proximity: {C.YELLOW}{C.BOLD}{w.proximity}{C.RESET} | Signal: {w.signal} | Protocol: {w.protocol}")
+            if w.company_id:
+                safe_print(f"     Company ID: {w.company_id}")
+            safe_print(f"     {C.BOLD}Evidence Log:{C.RESET}")
+            for ev in w.evidence:
+                safe_print(f"       * {C.YELLOW}[+{ev.points} pts]{C.RESET} {ev.description}")
+            safe_print(f"     {C.BOLD}Action:{C.RESET} {w.recommendation}\n")
 
     # Over-The-Air Rogue Spy Camera Hotspot Alerts
     if rogue_aps:
@@ -2025,17 +2450,20 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
     app, and scan the room for glowing purple/white infrared LEDs (night vision).
  5. Flashlight Reflection Test: Shine your phone flashlight at picture frames, screw
     heads, and mirror borders; lenses reflect bluish-purple or greenish light.
- 6. If You Find a Camera: Do NOT touch or unplug it. Photograph the device, document
+ 6. Smart Glasses & Audio Frames: Check for sunglasses or spectacles left on tables
+    or charging stands. Look for thick temple arms, front corner camera lenses, and
+    recording privacy notification LEDs.
+ 7. If You Find a Camera: Do NOT touch or unplug it. Photograph the device, document
     the location, leave the premises immediately, and contact Airbnb/police support.""")
     safe_print(f"{C.BOLD}{div}{C.RESET}\n")
 
 # ---------------------------------------------------------------------------
 # Interactive Dark-Mode HTML Report Generator
 # ---------------------------------------------------------------------------
-def generate_html_report(results: List[DeviceReport], config: ScanConfig, duration: float, filepath: str, rogue_aps: Optional[List[RogueAP]] = None):
+def generate_html_report(results: List[DeviceReport], config: ScanConfig, duration: float, filepath: str, rogue_aps: Optional[List[RogueAP]] = None, wearables: Optional[List[WearableDevice]] = None):
     """
     Generate a standalone, sleek dark-mode HTML report with expandable cards,
-    captured live snapshots, over-the-air rogue hotspots, and physical security advice.
+    captured live snapshots, over-the-air rogue hotspots, smart glasses alerts, and physical security advice.
     """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     critical_count = sum(1 for d in results if d.risk_level == "CRITICAL")
@@ -2046,6 +2474,26 @@ def generate_html_report(results: List[DeviceReport], config: ScanConfig, durati
     web_count = sum(1 for d in results if d.http_urls)
     snapshot_count = sum(1 for d in results if d.snapshot_captured)
     rogue_ap_count = sum(1 for a in rogue_aps if a.risk_level in ("CRITICAL", "HIGH")) if rogue_aps else 0
+    wearable_count = len(wearables) if wearables else 0
+
+    # Serialize wearables to JSON
+    wearables_data = []
+    if wearables:
+        for w in wearables:
+            wearables_data.append({
+                "name": w.name,
+                "address": w.address,
+                "device_type": w.device_type,
+                "brand": w.brand,
+                "signal": w.signal,
+                "proximity": w.proximity,
+                "company_id": w.company_id,
+                "protocol": w.protocol,
+                "risk_level": w.risk_level,
+                "score": w.score,
+                "evidence": [{"points": e.points, "category": e.category, "description": e.description, "details": e.details} for e in w.evidence],
+                "recommendation": w.recommendation
+            })
 
     # Serialize rogue APs to JSON
     rogue_aps_data = []
@@ -2623,6 +3071,10 @@ body {{
       <div class="stat-val">{len(results)}</div>
     </div>
     <div class="stat-card critical">
+      <div class="stat-label">Smart Glasses</div>
+      <div class="stat-val" style="color: {'var(--critical-red)' if wearable_count > 0 else 'var(--text-muted)'};">{wearable_count}</div>
+    </div>
+    <div class="stat-card critical">
       <div class="stat-label">Critical Cams</div>
       <div class="stat-val" style="color: var(--critical-red);">{critical_count}</div>
     </div>
@@ -2652,13 +3104,26 @@ body {{
     </div>
     <div class="filter-pills" role="toolbar" aria-label="Device Risk Filters">
       <button type="button" class="pill active" onclick="setFilter('ALL')" aria-label="Filter: Show all devices">All ({len(results)})</button>
-      <button type="button" class="pill" onclick="setFilter('ALERTS')" aria-label="Filter: Show high-priority alerts only">Alerts Only ({critical_count + high_count})</button>
+      <button type="button" class="pill" onclick="setFilter('ALERTS')" aria-label="Filter: Show high-priority alerts only">Alerts Only ({critical_count + high_count + wearable_count})</button>
+      <button type="button" class="pill" onclick="setFilter('GLASSES')" aria-label="Filter: Show smart glasses and AI eyewear">Eyewear ({wearable_count})</button>
       <button type="button" class="pill" onclick="setFilter('CRITICAL')" aria-label="Filter: Show critical risk cameras">Critical ({critical_count})</button>
       <button type="button" class="pill" onclick="setFilter('HIGH')" aria-label="Filter: Show high risk devices">High ({high_count})</button>
       <button type="button" class="pill" onclick="setFilter('MEDIUM')" aria-label="Filter: Show IoT devices">IoT ({medium_count})</button>
       <button type="button" class="pill" onclick="setFilter('SAFE')" aria-label="Filter: Show safe devices">Safe ({safe_count})</button>
       <button type="button" class="pill" onclick="toggleAllCards()" aria-label="Expand or collapse all device cards">Toggle All</button>
     </div>
+  </div>
+
+  <!-- Detected Smart Glasses & Camera Eyewear Section -->
+  <div class="checklist-card" id="wearablesContainer" style="display:none; margin-bottom:28px; border-left:4px solid var(--critical-red);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+      <div>
+        <h3 style="font-size:18px; font-weight:700;">🕶️ Detected Smart Glasses &amp; Camera Eyewear</h3>
+        <p style="font-size:13px; color:var(--text-secondary);">Nearby Bluetooth LE or wireless smart glasses (Ray-Ban Meta, Snap Spectacles, AI frames) equipped with video cameras and microphones.</p>
+      </div>
+      <span class="meta-badge" id="wearablesCountBadge" style="background:#7f1d1d; color:#fca5a5; border-color:#ef4444;">0 Eyewear</span>
+    </div>
+    <div id="wearablesListContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
   </div>
 
   <!-- Devices Accordion List -->
@@ -2705,6 +3170,10 @@ body {{
         <p>Darken the room completely. Open your phone camera (or selfie camera) and look around. Night-vision infrared LEDs emit a glowing violet or bright white dot on camera sensors.</p>
       </div>
       <div class="checklist-item">
+        <h4>🕶️ Smart Glasses &amp; Camera Frames</h4>
+        <p>Inspect sunglasses or spectacles left on tables, bedside shelves, or charging docks. Look for unusually thick temple arms (housing battery/electronics), front corner pinhole camera lenses adjacent to frame hinges, and white privacy notification LEDs.</p>
+      </div>
+      <div class="checklist-item">
         <h4>📸 If You Spot a Camera</h4>
         <p>Do NOT tamper with or disconnect the camera. Photograph the device and surrounding room context, leave the rental immediately, and contact Airbnb/booking customer support and local police.</p>
       </div>
@@ -2748,6 +3217,7 @@ body {{
 <script>
 const devices = {json.dumps(devices_data)};
 const rogueAPs = {json.dumps(rogue_aps_data)};
+const wearables = {json.dumps(wearables_data)};
 let currentFilter = 'ALL';
 let allExpanded = false;
 
@@ -2826,7 +3296,11 @@ function renderDevices() {{
   const filtered = devices.filter(d => {{
     // Risk Filter
     if (currentFilter === 'ALERTS' && !(d.risk_level === 'CRITICAL' || d.risk_level === 'HIGH')) return false;
-    if (currentFilter !== 'ALL' && currentFilter !== 'ALERTS' && d.risk_level !== currentFilter) return false;
+    if (currentFilter === 'GLASSES') {{
+      const dRole = (d.device_type || '').toLowerCase();
+      if (!dRole.includes('glass') && !dRole.includes('wearable')) return false;
+    }}
+    if (currentFilter !== 'ALL' && currentFilter !== 'ALERTS' && currentFilter !== 'GLASSES' && d.risk_level !== currentFilter) return false;
 
     // Search Query
     if (search) {{
@@ -2988,6 +3462,43 @@ function renderAirNetworks() {{
   `).join('');
 }}
 
+function renderWearables() {{
+  const container = document.getElementById('wearablesContainer');
+  const list = document.getElementById('wearablesListContainer');
+  const badge = document.getElementById('wearablesCountBadge');
+  if (!wearables || wearables.length === 0) {{
+    container.style.display = 'none';
+    return;
+  }}
+  container.style.display = 'block';
+  badge.innerText = `${{wearables.length}} Eyewear Detected`;
+  list.innerHTML = wearables.map(w => `
+    <div style="background:#1e293b; border-left:4px solid ${{w.risk_level === 'CRITICAL' ? 'var(--critical-red)' : 'var(--high-amber)'}}; padding:14px; border-radius:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="status-dot ${{w.risk_level}}"></span>
+          <div>
+            <strong style="font-size:15px; font-family:monospace;">${{w.device_type}}</strong>
+            <div style="font-size:12px; color:var(--text-muted); font-family:monospace;">Brand: ${{w.brand}} | Signal: ${{w.signal}} | Addr: ${{w.address}}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:12px; color:#38bdf8; font-weight:700; background:#0f172a; padding:4px 8px; border-radius:6px; border:1px solid #334155;">📍 ${{w.proximity}}</span>
+          <span class="risk-badge ${{w.risk_level}}">${{w.risk_level}}</span>
+        </div>
+      </div>
+      ${{w.evidence && w.evidence.length > 0 ? `
+        <div style="margin-top:10px; font-size:12px; color:#cbd5e1;">
+          ${{w.evidence.map(e => `<div>* <span style="color:#38bdf8;">[+${{e.points}} pts]</span> ${{e.description}}</div>`).join('')}}
+        </div>
+      ` : ''}}
+      <div style="margin-top:8px; font-size:12px; color:#fde68a;">
+        💡 ${{w.recommendation}}
+      </div>
+    </div>
+  `).join('');
+}}
+
 function toggleCard(idx) {{
   const card = document.getElementById(`dev-${{idx}}`);
   if (card) {{
@@ -3011,10 +3522,17 @@ function setFilter(filter) {{
   currentFilter = filter;
   document.querySelectorAll('.filter-pills .pill').forEach(btn => {{
     btn.classList.remove('active');
-    if (btn.innerText.startsWith(filter) || (filter === 'ALL' && btn.innerText.startsWith('All')) || (filter === 'ALERTS' && btn.innerText.startsWith('Alerts')) || (filter === 'MEDIUM' && btn.innerText.startsWith('IoT'))) {{
+    if (btn.innerText.startsWith(filter) || (filter === 'ALL' && btn.innerText.startsWith('All')) || (filter === 'ALERTS' && btn.innerText.startsWith('Alerts')) || (filter === 'GLASSES' && btn.innerText.startsWith('Eyewear')) || (filter === 'MEDIUM' && btn.innerText.startsWith('IoT'))) {{
       btn.classList.add('active');
     }}
   }});
+  if (filter === 'GLASSES') {{
+    const wSec = document.getElementById('wearablesContainer');
+    if (wSec) {{
+      wSec.style.display = 'block';
+      wSec.scrollIntoView({{ behavior: 'smooth' }});
+    }}
+  }}
   renderDevices();
 }}
 
@@ -3023,6 +3541,7 @@ document.getElementById('searchInput').addEventListener('input', renderDevices);
 // Initial Render
 renderDevices();
 renderAirNetworks();
+renderWearables();
 </script>
 </body>
 </html>"""
@@ -3091,6 +3610,23 @@ def generate_mock_rogue_aps() -> List[RogueAP]:
             recommendation="ROGUE IN-AIR SPY CAMERA DETECTED. Device is broadcasting its own hotspot. Search room fixtures (clocks, chargers, smoke detectors) immediately."
         ),
         RogueAP(
+            ssid="Ray-Ban-Stories-Sync-421",
+            bssid="38:47:12:a9:44:11",
+            signal="89%",
+            security="WPA2-Personal",
+            channel="6",
+            vendor="Luxottica Tristar / Ray-Ban Meta",
+            vendor_category="SMART_GLASSES",
+            risk_level="CRITICAL",
+            score=90,
+            evidence=[
+                Evidence(55, "AIR_SSID", "In-Air Wi-Fi Hotspot matches smart camera glasses: 'ray-ban' in 'Ray-Ban-Stories-Sync-421'", "Direct P2P Wi-Fi sync network used by Ray-Ban Meta camera glasses to offload high-resolution video clips to phone."),
+                Evidence(40, "VENDOR", "Hotspot BSSID matches hardware: Luxottica Tristar / Ray-Ban Meta (38:47:12)", "Luxottica eyewear hardware manufacturing OUI prefix."),
+                Evidence(15, "PROXIMITY", "Strong Signal Strength (89%): Device in close physical proximity!", "Transmitter is in the immediate room.")
+            ],
+            recommendation="SMART GLASSES SYNC HOTSPOT DETECTED. Ray-Ban Meta smart glasses Wi-Fi direct network detected transferring video/media. Inspect immediate room for active camera glasses."
+        ),
+        RogueAP(
             ssid="HD-MINI-CAM-74f0",
             bssid="a0:92:08:74:f0:11",
             signal="84%",
@@ -3119,6 +3655,49 @@ def generate_mock_rogue_aps() -> List[RogueAP]:
             score=0,
             evidence=[],
             recommendation="Primary authorized guest Wi-Fi access point."
+        )
+    ]
+
+def generate_mock_wearables() -> List[WearableDevice]:
+    """
+    Generate realistic simulated smart glasses and AI camera eyewear
+    for demonstration and testing scenarios.
+    """
+    return [
+        WearableDevice(
+            name="Ray-Ban Stories / Meta View",
+            address="80:aa:1c:44:91:2f",
+            device_type="Ray-Ban Meta Smart Glasses",
+            brand="Luxottica Group S.p.A. / Meta",
+            signal="-58 dBm (Strong)",
+            proximity="Immediate Proximity (< 1.5m)",
+            company_id="0x0D53",
+            protocol="BLE Advertisement (Manufacturer CID 0x0D53)",
+            risk_level="CRITICAL",
+            score=95,
+            evidence=[
+                Evidence(85, "BLE_SIG", "Bluetooth SIG Manufacturer ID matches: Luxottica Group S.p.A. (0x0D53)", "Hardware manufacturer of Ray-Ban Meta & Ray-Ban Stories AI camera glasses. Contains front-facing ultra-wide camera and spatial audio recording."),
+                Evidence(20, "BLE_NAME", "Bluetooth broadcast name matches camera glasses: 'Ray-Ban Stories / Meta View'", "Direct match for Ray-Ban Meta companion app sync protocol."),
+                Evidence(10, "PROXIMITY", "Signal Strength -58 dBm: Immediate Proximity (< 1.5m)", "Device is actively operating in immediate physical space (worn by an individual in the room).")
+            ],
+            recommendation="SMART CAMERA EYEWEAR DETECTED IN IMMEDIATE VICINITY. An individual nearby is wearing or carrying Ray-Ban Meta Smart Glasses equipped with video recording capabilities. Verify recording status indicator LED."
+        ),
+        WearableDevice(
+            name="Snap Spectacles v3",
+            address="02:c4:9a:11:82:70",
+            device_type="Snap Spectacles Smart Camera Glasses",
+            brand="Snap Inc.",
+            signal="-74 dBm (Moderate)",
+            proximity="Room Vicinity (1.5 - 4m)",
+            company_id="0x03C2",
+            protocol="BLE Advertisement (Manufacturer CID 0x03C2)",
+            risk_level="HIGH",
+            score=80,
+            evidence=[
+                Evidence(85, "BLE_SIG", "Bluetooth SIG Manufacturer ID matches: Snap Inc. (0x03C2)", "Dual HD stereoscopic video recording camera glasses."),
+                Evidence(20, "BLE_NAME", "Bluetooth broadcast name matches camera glasses: 'Snap Spectacles v3'", "Snapchat camera eyewear companion protocol.")
+            ],
+            recommendation="SMART CAMERA GLASSES DETECTED. Dual stereoscopic video capture device detected in the room or adjacent area."
         )
     ]
 
@@ -3285,20 +3864,22 @@ def run_scan(config: ScanConfig):
         print(f"{C.YELLOW}{C.BOLD}[*] Running in SIMULATION / DEMO MODE (Generating realistic rental stay scenario){C.RESET}\n")
         results = generate_mock_devices()
         rogue_aps = generate_mock_rogue_aps()
+        wearables = generate_mock_wearables()
         duration = 1.8
 
-        print_terminal_report(results, config, duration, rogue_aps=rogue_aps)
+        print_terminal_report(results, config, duration, rogue_aps=rogue_aps, wearables=wearables)
 
         if not config.no_html:
             html_path = config.output_html or f"optichound_report_{int(time.time())}.html"
-            if generate_html_report(results, config, duration, html_path, rogue_aps=rogue_aps):
+            if generate_html_report(results, config, duration, html_path, rogue_aps=rogue_aps, wearables=wearables):
                 print(f"{C.GREEN}[+] Clean HTML Report saved to: {C.BOLD}{os.path.abspath(html_path)}{C.RESET}")
 
         if config.output_json:
             with open(config.output_json, "w") as f:
                 json.dump({
                     "devices": [d.__dict__ for d in results],
-                    "rogue_aps": [a.__dict__ for a in rogue_aps]
+                    "rogue_aps": [a.__dict__ for a in rogue_aps],
+                    "wearables": [w.__dict__ for w in wearables]
                 }, f, default=str, indent=2)
             print(f"{C.GREEN}[+] JSON scan results saved to: {C.BOLD}{config.output_json}{C.RESET}")
         return
@@ -3396,6 +3977,21 @@ def run_scan(config: ScanConfig):
         except Exception:
             print("    • In-air Wi-Fi scanning skipped (Wi-Fi adapter unavailable).")
 
+    # 3.8 Bluetooth Low Energy (BLE) Smart Glasses & Wearable Detection
+    wearables: List[WearableDevice] = []
+    if config.ble_scan:
+        print(f"\n{C.CYAN}[*] Step 3.8: Scanning Bluetooth Low Energy (BLE) for smart glasses & AI eyewear...{C.RESET}")
+        try:
+            wearables = scan_ble_wearables(timeout_secs=3.0 if config.quick_mode else 5.0)
+            if wearables:
+                print(f"    • {C.BG_RED} ALERT: Detected {len(wearables)} AI Smart Glasses / Wearable device(s) nearby! {C.RESET}")
+                for w in wearables:
+                    print(f"      - {C.RED}{C.BOLD}{w.device_type}{C.RESET} ({w.brand}) | Signal: {w.signal} ({w.proximity})")
+            else:
+                print("    • BLE scan complete: No smart glasses or camera eyewear detected.")
+        except Exception:
+            print("    • BLE scan skipped (Bluetooth controller unavailable or disabled).")
+
     # 4. Deep Port Scanning & Fingerprinting
     target_ips = sorted(list(discovered_ips), key=lambda x: [int(p) for p in x.split(".") if p.isdigit()])
     print(f"\n{C.CYAN}[*] Step 4: Probing streaming ports, RTSP feeds & web dashboards across {len(target_ips)} devices...{C.RESET}")
@@ -3423,18 +4019,19 @@ def run_scan(config: ScanConfig):
     duration = time.time() - start_time
 
     # 5. Output Reports
-    print_terminal_report(results, config, duration, rogue_aps=rogue_aps)
+    print_terminal_report(results, config, duration, rogue_aps=rogue_aps, wearables=wearables)
 
     if not config.no_html:
         html_path = config.output_html or f"optichound_report_{int(time.time())}.html"
-        if generate_html_report(results, config, duration, html_path, rogue_aps=rogue_aps):
+        if generate_html_report(results, config, duration, html_path, rogue_aps=rogue_aps, wearables=wearables):
             print(f"{C.GREEN}[+] Clean Dark-Mode HTML Report saved to: {C.BOLD}{os.path.abspath(html_path)}{C.RESET}")
 
     if config.output_json:
         with open(config.output_json, "w") as f:
             json.dump({
                 "devices": [d.__dict__ for d in results],
-                "rogue_aps": [a.__dict__ for a in rogue_aps]
+                "rogue_aps": [a.__dict__ for a in rogue_aps],
+                "wearables": [w.__dict__ for w in wearables]
             }, f, default=str, indent=2)
         print(f"{C.GREEN}[+] JSON results exported to: {C.BOLD}{config.output_json}{C.RESET}")
 
@@ -3463,6 +4060,8 @@ Examples:
     parser.add_argument("--ports", type=str, default=None, help="Comma-separated custom port list to scan (e.g. 80,554,8080,37777).")
     parser.add_argument("-a", "--air-scan", action="store_true", default=True, help="Scan over-the-air Wi-Fi signals for rogue spy-cam hotspots (default: enabled)")
     parser.add_argument("--no-air-scan", action="store_false", dest="air_scan", help="Disable over-the-air rogue Wi-Fi hotspot scanning")
+    parser.add_argument("-b", "--ble", action="store_true", default=True, help="Scan Bluetooth Low Energy (BLE) advertisements for smart glasses (default: enabled)")
+    parser.add_argument("--no-ble", action="store_false", dest="ble_scan", help="Disable Bluetooth Low Energy smart glasses scan")
     parser.add_argument("--snapshots", action="store_true", default=True, help="Audit open camera ports for live unauthenticated snapshots (default: enabled)")
     parser.add_argument("--no-snapshots", action="store_false", dest="snapshots", help="Disable camera snapshot auditing")
     parser.add_argument("-o", "--html", type=str, default=None, help="Custom file path for the generated dark-mode HTML report.")
@@ -3496,6 +4095,7 @@ Examples:
         threads=args.threads,
         custom_ports=custom_ports,
         air_scan=args.air_scan,
+        ble_scan=args.ble_scan,
         snapshot_audit=args.snapshots,
         output_html=args.html,
         no_html=args.no_html,
