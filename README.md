@@ -30,6 +30,10 @@ OpticHound is a portable, zero-dependency Python tool designed to help travelers
   - **RSSI Proximity Meter**: Evaluates received signal power (`Immediate Proximity < 1.5m` vs `Room Vicinity 1.5–4m`) to alert travelers when active recording glasses are in the immediate room.
   - **In-Air Direct Sync Wi-Fi Hotspots**: Detects transient P2P sync networks (`Ray-Ban-*`, `meta-view-*`, `spectacles-*`) used to offload captured video clips.
   - **Zero External Python Libraries**: Runs using native Windows WinRT APIs on Windows, `bluetoothctl` on Linux, and `system_profiler` on macOS.
+- **Audio Surveillance & Microphone Stream Prober**:
+  - **RTSP SDP Audio Parser**: Issues `DESCRIBE` requests on video streams to detect embedded live microphone audio feeds (`m=audio`, AAC, G.711, PCM).
+  - **Always-Listening Microphone Detection**: Identifies smart speakers, smart displays, smart TVs, and voice assistants equipped with far-field acoustic arrays (Amazon Echo, Google Nest, Apple HomePod).
+  - **Audio Eavesdropping Callout**: Displays dedicated `ACTIVE AUDIO SURVEILLANCE` alert cards in terminal and HTML reports for any device streaming room audio.
 - **Deep Protocol Probing**:
   - **Live Unauthenticated Snapshot Grabber**: Probes open camera HTTP endpoints (`/snapshot.jpg`, `/jpg/image.jpg`, `/webcapture.jpg`, etc.) and downloads live image frames as optical proof, automatically embedded as base64 thumbnails in the HTML report.
   - **Over-the-Air Rogue Wi-Fi Hunter**: Scans ambient wireless beacons for rogue P2P spy camera APs (`Care-AP-*`, `HD-MINI-CAM-*`, `LookCam-*`, `v380_*`, `ESP32-CAM-*`) that are not joined to the property router, cross-referenced with vendor OUI heuristics on Windows (`netsh`), macOS (`airport`), and Linux (`nmcli`/`iwlist`).
@@ -193,8 +197,15 @@ Even cameras that do not broadcast on Wi-Fi (such as battery-powered cameras rec
 6. **Smart Glasses & Camera Frames**:
    - Inspect sunglasses or spectacles left resting on nightstands, desks, or charging docks.
    - Look for unusually thick temple arms (housing battery and compute chips), front corner pinhole camera lenses adjacent to the frame hinges, and white privacy notification LEDs.
-7. **If You Find a Camera**:
-   - **Do NOT tamper with or disconnect the camera**.
+7. **Hidden Audio Bugs & Eavesdropping Microphones**:
+   - Inspect power strips, under conference/dining tables, and inside AC return vents for standalone microphone transmitters.
+   - Disconnect or unplug undeclared smart speakers (Echo, Nest) in bedrooms and bathrooms.
+   - For sensitive discussions, play soft radio background music or run an acoustic white-noise app to disrupt room microphones.
+8. **Contactless NFC & RFID Card Skimming Defense**:
+   - Keep physical credit/debit cards inside an RFID-blocking Faraday wallet or card sleeve to prevent 13.56 MHz proximity reader coupling.
+   - Pay using smartphone wallets (Apple Pay, Google Wallet) whenever possible—mobile wallets require biometric Face ID or Fingerprint authentication before their NFC antenna will transmit, making them completely immune to pocket skimming.
+9. **If You Find a Camera or Audio Bug**:
+   - **Do NOT tamper with or disconnect the device**.
    - Photograph and record video of the device, capturing its location and angle in the room.
    - Leave the accommodation immediately.
    - Contact Airbnb / Vrbo / hotel customer safety support and file a police report.

@@ -502,9 +502,43 @@ class TestSmartGlassesDetection(unittest.TestCase):
             self.assertIn("Detected Smart Glasses &amp; Camera Eyewear", html)
             self.assertIn("Smart Glasses &amp; Camera Frames", html)
             self.assertIn("Eyewear Detected", html)
+            self.assertIn("Audio Bugs &amp; Listening Devices", html)
+            self.assertIn("Contactless NFC &amp; Digital Card Protection", html)
+            self.assertIn("Audio / Mics", html)
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
+
+
+class TestAudioAndNfcSurveillance(unittest.TestCase):
+    """
+    Test suite for audio eavesdropping, active room microphone streams,
+    smart speaker detection, and NFC traveler protection guidance.
+    """
+
+    def test_audio_stream_scoring(self):
+        dev = DeviceReport(
+            ip="192.168.1.50",
+            has_audio=True,
+            audio_details="Live RTSP Audio Stream (AAC 16kHz)",
+            open_ports=[554],
+            rtsp_active=True
+        )
+        evaluated = evaluate_device_risk(dev)
+        self.assertTrue(any(e.category == "AUDIO" for e in evaluated.evidence))
+        self.assertGreaterEqual(evaluated.score, 75)
+
+    def test_smart_display_microphone_detection(self):
+        dev = DeviceReport(
+            ip="192.168.1.60",
+            vendor="Ring LLC / Amazon Echo",
+            vendor_category="SMART_DISPLAY",
+            open_ports=[8443]
+        )
+        evaluated = evaluate_device_risk(dev)
+        self.assertTrue(evaluated.has_audio)
+        self.assertIn("Microphone", evaluated.audio_details)
+        self.assertTrue(any(e.category == "AUDIO" for e in evaluated.evidence))
 
 
 if __name__ == "__main__":

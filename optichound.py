@@ -99,6 +99,10 @@ class Colors:
     def BG_YELLOW(self): return self._c("\033[43m\033[30m\033[1m")
     @property
     def BG_GREEN(self): return self._c("\033[42m\033[30m\033[1m")
+    @property
+    def BG_BLUE(self): return self._c("\033[44m\033[97m\033[1m")
+    @property
+    def BG_CYAN(self): return self._c("\033[46m\033[30m\033[1m")
 
 # Global colors instance
 C = Colors(enabled=True)
@@ -732,6 +736,8 @@ class DeviceReport:
     snapshot_captured: bool = False
     snapshot_url: str = ""
     snapshot_b64: str = ""
+    has_audio: bool = False
+    audio_details: str = ""
     score: int = 0
     risk_level: str = "SAFE"  # 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'SAFE'
     evidence: List[Evidence] = field(default_factory=list)
@@ -1272,11 +1278,11 @@ def discover_mdns_services(timeout: float = 1.5) -> Dict[str, List[str]]:
 # ---------------------------------------------------------------------------
 # Deep Protocol Probers: RTSP, HTTP/HTTPS, Xiongmai, Dahua
 # ---------------------------------------------------------------------------
-def probe_rtsp(ip: str, port: int, timeout: float = 1.2) -> Tuple[bool, str, Dict[str, str]]:
+def probe_rtsp(ip: str, port: int, timeout: float = 1.2) -> Tuple[bool, str, Dict[str, str], bool, str]:
     """
-    Probe RTSP video streaming service on target port.
-    Sends standard RFC 2326 OPTIONS request and inspects response headers.
-    Returns: (is_rtsp, server_banner, headers_dict)
+    Probe RTSP video and audio streaming service on target port.
+    Sends standard RFC 2326 OPTIONS & DESCRIBE requests to detect video & audio tracks.
+    Returns: (is_rtsp, server_banner, headers_dict, has_audio, audio_details)
     """
     rtsp_req = (
         f"OPTIONS rtsp://{ip}:{port}/ RTSP/1.0\r\n"
@@ -1285,13 +1291,15 @@ def probe_rtsp(ip: str, port: int, timeout: float = 1.2) -> Tuple[bool, str, Dic
         "\r\n"
     ).encode("utf-8")
 
+    has_audio = False
+    audio_details = ""
+
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(timeout)
         s.connect((ip, port))
         s.sendall(rtsp_req)
         resp = s.recv(2048).decode("utf-8", errors="ignore")
-        s.close()
 
         if "RTSP/1.0" in resp:
             headers = {}
@@ -1300,10 +1308,35 @@ def probe_rtsp(ip: str, port: int, timeout: float = 1.2) -> Tuple[bool, str, Dic
                     k, v = line.split(":", 1)
                     headers[k.strip().lower()] = v.strip()
             server = headers.get("server", "RTSP Server")
-            return (True, server, headers)
+
+            # Follow up with DESCRIBE to inspect SDP media lines (m=audio, m=video)
+            try:
+                describe_req = (
+                    f"DESCRIBE rtsp://{ip}:{port}/ RTSP/1.0\r\n"
+                    "CSeq: 2\r\n"
+                    "Accept: application/sdp\r\n"
+                    "User-Agent: OpticHound/2.0\r\n"
+                    "\r\n"
+                ).encode("utf-8")
+                s.sendall(describe_req)
+                desc_resp = s.recv(4096).decode("utf-8", errors="ignore")
+                if "m=audio" in desc_resp.lower():
+                    has_audio = True
+                    codec = "PCM / AAC / G.711"
+                    for l in desc_resp.splitlines():
+                        if "rtpmap:" in l.lower() and ("pcmu" in l.lower() or "pcma" in l.lower() or "aac" in l.lower() or "opus" in l.lower() or "g7" in l.lower()):
+                            codec = l.split(":", 1)[1].strip()
+                            break
+                    audio_details = f"Active RTSP Room Microphone Stream ({codec})"
+            except Exception:
+                pass
+
+            s.close()
+            return (True, server, headers, has_audio, audio_details)
+        s.close()
     except Exception:
         pass
-    return (False, "", {})
+    return (False, "", {}, False, "")
 
 def probe_http(ip: str, port: int, use_ssl: bool = False, timeout: float = 1.5) -> Dict[str, Any]:
     """
@@ -1893,6 +1926,28 @@ def evaluate_device_risk(dev: DeviceReport) -> DeviceReport:
             details="Live optical feed verified! Camera image grabbed directly without credentials."
         ))
 
+    # 0.5. Live Audio Recording / Microphone Stream (+35)
+    if dev.has_audio:
+        score += 35
+        dev.evidence.append(Evidence(
+            points=35,
+            category="AUDIO",
+            description=f"Active Room Microphone Audio Stream: {dev.audio_details or 'Live Microphone Feed'}",
+            details="Device has an active microphone and is streaming room acoustic audio / conversations over the network."
+        ))
+
+    # Smart Displays & Assistant Microphones (+20)
+    if dev.vendor_category == "SMART_DISPLAY" or any(k in dev.vendor.lower() for k in ["echo", "alexa", "nest", "homepod", "sonos"]):
+        if not dev.has_audio:
+            dev.has_audio = True
+            dev.audio_details = "Always-Listening Far-Field Microphone Array (Voice Assistant / Smart Mic)"
+        dev.evidence.append(Evidence(
+            points=20,
+            category="AUDIO",
+            description=f"Far-Field Voice Microphone Array: {dev.vendor}",
+            details="Always-listening microphone array continuously active to detect voice commands and room audio."
+        ))
+
     # 1. Verified RTSP Video Streaming (+45)
     if dev.rtsp_active:
         score += 45
@@ -2195,11 +2250,16 @@ def scan_device(ip: str, mac: str, config: "ScanConfig", upnp_cache: Dict, onvif
     for port in dev.open_ports:
         # RTSP Probing
         if port in [554, 8554, 7447, 10554]:
-            is_rtsp, srv, headers = probe_rtsp(ip, port, timeout=config.timeout + 0.5)
+            is_rtsp, srv, headers, has_audio, audio_details = probe_rtsp(ip, port, timeout=config.timeout + 0.5)
             if is_rtsp:
                 dev.rtsp_active = True
                 dev.rtsp_server = srv
-                dev.port_banners[port] = f"RTSP Server: {srv}"
+                banner = f"RTSP Server: {srv}"
+                if has_audio:
+                    dev.has_audio = True
+                    dev.audio_details = audio_details
+                    banner += f" | [LIVE AUDIO MICROPHONE STREAM: {audio_details}]"
+                dev.port_banners[port] = banner
 
         # HTTP/HTTPS Web Dashboard Probing
         if port in [80, 81, 82, 83, 84, 88, 8080, 8081, 8082, 8888, 9000, 10000]:
@@ -2380,6 +2440,7 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
     medium_count = sum(1 for d in results if d.risk_level == "MEDIUM")
     low_safe_count = len(results) - (critical_count + high_count + medium_count)
     wearable_count = len(wearables) if wearables else 0
+    audio_count = sum(1 for d in results if getattr(d, "has_audio", False))
 
     div = "=" * 78
     sub_div = "-" * 78
@@ -2391,6 +2452,8 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
     stat_line = f" Total Devices: {C.BOLD}{len(results)}{C.RESET} | "
     if wearable_count > 0:
         stat_line += f"{C.BG_RED} Smart Glasses: {wearable_count} {C.RESET} | "
+    if audio_count > 0:
+        stat_line += f"{C.BG_RED} Mics/Audio: {audio_count} {C.RESET} | "
     if critical_count > 0:
         stat_line += f"{C.BG_RED} CRITICAL: {critical_count} {C.RESET} | "
     else:
@@ -2418,6 +2481,8 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
                 safe_print(f"     Web Title: {C.YELLOW}'{dev.http_title}'{C.RESET}")
             if dev.rtsp_active:
                 safe_print(f"     RTSP Feed: {C.RED}Active ({dev.rtsp_server or 'Port 554'}){C.RESET}")
+            if getattr(dev, "has_audio", False):
+                safe_print(f"     Microphone Feed: {C.RED}{dev.audio_details or 'Active Room Audio Stream'}{C.RESET}")
             if dev.snapshot_captured:
                 safe_print(f"     Snapshot:  {C.BG_RED} [LIVE CAMERA VIEW CAPTURED] {C.RESET} -> {dev.snapshot_url}")
             if dev.open_ports:
@@ -2428,6 +2493,18 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
             for ev in dev.evidence:
                 safe_print(f"       * {C.YELLOW}[+{ev.points} pts]{C.RESET} {ev.description}")
             safe_print(f"     {C.BOLD}Action:{C.RESET} {dev.recommendation}\n")
+
+    # Active Audio Surveillance & Microphone Stream Alerts
+    audio_devs = [d for d in results if getattr(d, "has_audio", False) and d.risk_level not in ("CRITICAL", "HIGH")]
+    if audio_devs:
+        safe_print(f"\n{C.BG_BLUE} [!] ACTIVE AUDIO SURVEILLANCE & MICROPHONE ALERTS DETECTED {C.RESET}\n")
+        safe_print(f" {C.YELLOW}WARNING: Smart speakers or listening devices equipped with room microphones detected!{C.RESET}")
+        safe_print(" These devices can process and record ambient conversations in this room.\n")
+        for dev in audio_devs:
+            safe_print(f" {C.BG_BLUE} {dev.risk_level} {C.RESET} {C.BOLD}{dev.ip}{C.RESET} ({dev.mac}) - {C.CYAN}{dev.vendor}{C.RESET}")
+            safe_print(f"     Microphone Feed: {C.YELLOW}{dev.audio_details or 'Active Room Microphone Array'}{C.RESET}")
+            safe_print(f"     Device Type:     {dev.device_type}")
+            safe_print(f"     Action:          {dev.recommendation}\n")
 
     # Smart Glasses & AI Camera Eyewear Alerts
     if wearables:
@@ -2529,8 +2606,13 @@ def print_terminal_report(results: List[DeviceReport], config: ScanConfig, durat
  6. Smart Glasses & Audio Frames: Check for sunglasses or spectacles left on tables
     or charging stands. Look for thick temple arms, front corner camera lenses, and
     recording privacy notification LEDs.
- 7. If You Find a Camera: Do NOT touch or unplug it. Photograph the device, document
-    the location, leave the premises immediately, and contact Airbnb/police support.""")
+ 7. Hidden Audio Bugs & Microphones: Inspect power strips, under conference/dining tables,
+    and AC return grilles. Disconnect undeclared smart speakers (Echo, Nest) in bedrooms.
+ 8. Contactless NFC & Card Skimming Defense: Keep physical bank cards in an RFID-blocking
+    wallet/sleeve. Use phone wallets (Apple Pay/Google Wallet)—they require biometric
+    Face ID/Fingerprint and cannot be skimmed in your pocket without your knowledge.
+ 9. If You Find a Camera or Audio Bug: Do NOT touch or unplug it. Photograph the device,
+    document the location, leave the premises immediately, and contact Airbnb/police support.""")
     safe_print(f"{C.BOLD}{div}{C.RESET}\n")
 
 # ---------------------------------------------------------------------------
@@ -2551,6 +2633,7 @@ def generate_html_report(results: List[DeviceReport], config: ScanConfig, durati
     snapshot_count = sum(1 for d in results if d.snapshot_captured)
     rogue_ap_count = sum(1 for a in rogue_aps if a.risk_level in ("CRITICAL", "HIGH")) if rogue_aps else 0
     wearable_count = len(wearables) if wearables else 0
+    audio_count = sum(1 for d in results if getattr(d, "has_audio", False))
 
     # Serialize wearables to JSON
     wearables_data = []
@@ -2615,6 +2698,8 @@ def generate_html_report(results: List[DeviceReport], config: ScanConfig, durati
             "snapshot_captured": d.snapshot_captured,
             "snapshot_url": d.snapshot_url,
             "snapshot_b64": d.snapshot_b64,
+            "has_audio": getattr(d, "has_audio", False),
+            "audio_details": getattr(d, "audio_details", ""),
             "score": d.score,
             "risk_level": d.risk_level,
             "evidence": [{"points": e.points, "category": e.category, "description": e.description, "details": e.details} for e in d.evidence],
@@ -3170,6 +3255,10 @@ body {{
       <div class="stat-label">RTSP Streams</div>
       <div class="stat-val">{rtsp_count}</div>
     </div>
+    <div class="stat-card {'critical' if audio_count > 0 else 'neutral'}">
+      <div class="stat-label">Audio / Mics</div>
+      <div class="stat-val" style="color: {'var(--critical-red)' if audio_count > 0 else 'var(--text-muted)'};">{audio_count}</div>
+    </div>
   </div>
 
   <!-- Search & Filter Controls -->
@@ -3248,6 +3337,14 @@ body {{
       <div class="checklist-item">
         <h4>🕶️ Smart Glasses &amp; Camera Frames</h4>
         <p>Inspect sunglasses or spectacles left on tables, bedside shelves, or charging docks. Look for unusually thick temple arms (housing battery/electronics), front corner pinhole camera lenses adjacent to frame hinges, and white privacy notification LEDs.</p>
+      </div>
+      <div class="checklist-item">
+        <h4>🎙️ Audio Bugs &amp; Listening Devices</h4>
+        <p>Eavesdropping transmitters and voice-recording bugs are commonly concealed in power strips, under conference/dining tables, and inside AC return grilles. Disconnect or unplug undeclared smart speakers (Echo, Nest) in bedrooms and bathrooms. Playing soft radio background audio or acoustic white noise can mask private conversations.</p>
+      </div>
+      <div class="checklist-item">
+        <h4>💳 Contactless NFC &amp; Digital Card Protection</h4>
+        <p>Protect physical contactless cards against accidental or rogue NFC scans using an RFID-blocking Faraday wallet or card sleeve. Pay using smartphone wallets (Apple Pay / Google Wallet) where possible—phones require biometric Face ID or Fingerprint authentication before their NFC antenna activates, making them physically immune to unauthorized pocket skimming.</p>
       </div>
       <div class="checklist-item">
         <h4>📸 If You Spot a Camera</h4>
@@ -3451,6 +3548,7 @@ function renderDevices() {{
             <span class="ip-text">${{dev.ip}} ${{specialLabel}}</span>
             <span class="hostname-text">${{dev.hostname || dev.device_type || 'Connected Device'}}</span>
           </div>
+          ${{dev.has_audio ? '<span class="vendor-tag" style="background:#450a0a; color:#fca5a5; border:1px solid #ef4444; font-weight:700;">🎙️ Active Mic / Audio</span>' : ''}}
           <span class="vendor-tag" style="background:#1e293b; color:#38bdf8; font-weight:600;">${{dev.device_type || 'Device'}}</span>
           <span class="vendor-tag">${{dev.vendor}}</span>
           <span class="mac-tag">${{dev.mac}}</span>
@@ -3804,6 +3902,8 @@ def generate_mock_devices() -> List[DeviceReport]:
             http_urls=["http://192.168.1.134:80/"],
             rtsp_active=True,
             rtsp_server="Hipcam RTSP Server v1.2",
+            has_audio=True,
+            audio_details="Live RTSP Microphone Audio Stream (AAC 16kHz)",
             upnp_data={"friendly_name": "Smart Clock Camera", "model": "IPC-Mini-HD", "device_type": "urn:schemas-upnp-org:device:DigitalSecurityCamera:1"},
             snapshot_captured=True,
             snapshot_url="http://192.168.1.134:80/snapshot.jpg",
@@ -3813,6 +3913,7 @@ def generate_mock_devices() -> List[DeviceReport]:
             evidence=[
                 Evidence(50, "SNAPSHOT", "CAPTURED LIVE CAMERA SNAPSHOT from unauthenticated endpoint: http://192.168.1.134:80/snapshot.jpg", "Unauthenticated live optical feed confirmed! Live frame captured from bedside clock."),
                 Evidence(45, "STREAM", "Active RTSP Video Streaming Protocol on port 554 (Hipcam RTSP Server v1.2)", "Live RTSP stream is accessible."),
+                Evidence(35, "AUDIO", "Active Room Microphone Stream: Live audio track embedded in RTSP feed (AAC 16kHz)", "Hidden spy camera contains live microphone capturing speech in the room."),
                 Evidence(25, "VENDOR", "MAC OUI matched IoT/Spy Cam Chipset: Espressif Inc (ESP32-CAM)", "Heavily used in mini hidden spy cameras."),
                 Evidence(35, "WEB", "Web Dashboard Title matches camera: 'Live Video Feed'", "Interface indicates direct camera view."),
                 Evidence(25, "WEB", "Embedded Camera Web Server header detected: 'uc-httpd/1.0.0'", "Common embedded camera web server."),
@@ -3866,9 +3967,12 @@ def generate_mock_devices() -> List[DeviceReport]:
             port_banners={8443: "HTTPS 200 | Server: Amazon-Echo"},
             http_title="Amazon Device",
             http_server="Amazon-Echo",
+            has_audio=True,
+            audio_details="Always-Listening Far-Field Microphone Array (Amazon Alexa)",
             score=35,
             risk_level="MEDIUM",
             evidence=[
+                Evidence(20, "AUDIO", "Far-Field Microphone Array Active (Ring LLC / Amazon Echo)", "Hardware contains multi-mic beamforming array listening for ambient room audio."),
                 Evidence(15, "VENDOR", "Smart Home Device with potential camera/mic: Ring LLC / Amazon Echo", "Equipped with camera/microphone."),
                 Evidence(10, "PORT", "Port 8443 Open (HTTPS Alternate)", "Local management endpoint.")
             ],
